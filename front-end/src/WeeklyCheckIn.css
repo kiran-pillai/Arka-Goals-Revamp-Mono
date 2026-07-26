@@ -1,0 +1,157 @@
+/* Shared Cheetah Squad brand chrome — reused by the landing screen and the
+   weekly check-in form. Amber/bronze theme drawn from the Arka mark. */
+.squad-screen {
+  --amber: #e6a532;
+  --bronze: #a85f22;
+  --card-bg: #fffdf8;
+  --card-border: #ecdcc0;
+  --glow: radial-gradient(
+    ellipse 90% 60% at 50% -10%,
+    rgba(230, 165, 50, 0.22),
+    transparent 70%
+  );
+
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 20px;
+  background: var(--glow), var(--bg);
+}
+
+.squad-card {
+  width: 100%;
+  max-width: 620px;
+  box-sizing: border-box;
+  padding: 48px 44px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.squad-card.is-landing {
+  text-align: center;
+}
+
+/* The table needs more room than the form/landing card. */
+.squad-card.checkins-card {
+  max-width: 1040px;
+}
+
+/* --- Arka org lockup --- */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 8px 8px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: var(--social-bg);
+}
+.brand-arka {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: block;
+}
+.brand-org {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 3.5px;
+  color: var(--bronze);
+}
+
+/* --- Cheetah Squad identity --- */
+.squad {
+  margin-top: 30px;
+  text-align: center;
+}
+.squad-portrait {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, var(--amber), var(--bronze));
+  box-shadow: 0 8px 20px rgba(168, 95, 34, 0.4);
+}
+.squad-portrait img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  display: block;
+  border: 3px solid var(--card-bg);
+}
+.squad-name {
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  margin: 16px 0 6px;
+  padding-bottom: 0.12em;
+  background: linear-gradient(100deg, var(--amber), var(--bronze));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.squad-tag {
+  font-size: 17px;
+  letter-spacing: 0.4px;
+  color: var(--text);
+}
+
+.squad-footer {
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  color: var(--text);
+}
+
+/* --- Sent / submitted confirmation --- */
+.checkin-sent {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.checkin-sent svg {
+  width: 52px;
+  height: 52px;
+  color: var(--bronze);
+  padding: 12px;
+  border-radius: 50%;
+  background: rgba(230, 165, 50, 0.15);
+  box-sizing: border-box;
+}
+
+/* --- Dark mode --- */
+@media (prefers-color-scheme: dark) {
+  .squad-screen {
+    --card-bg: #1d1a15;
+    --card-border: #3a3226;
+    --amber: #f0b849;
+    --bronze: #d08a3a;
+    --glow: radial-gradient(
+      ellipse 90% 60% at 50% -10%,
+      rgba(230, 165, 50, 0.14),
+      transparent 70%
+    );
+  }
+  .squad-tag {
+    color: #b9ad97;
+  }
+}
+
+@media (max-width: 480px) {
+  .squad-card {
+    padding: 32px 22px;
+  }
+  .squad-name {
+    font-size: 28px;
+  }
+}
