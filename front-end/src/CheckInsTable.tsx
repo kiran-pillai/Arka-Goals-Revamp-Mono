@@ -40,15 +40,16 @@ function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
             </Text>
           </Stack>
         ) : (
-          <Table.ScrollContainer minWidth={860}>
+          <Table.ScrollContainer minWidth={1000}>
             <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Name</Table.Th>
-                  <Table.Th>Weekly goal completed</Table.Th>
-                  <Table.Th>Committing to THIS WEEK</Table.Th>
-                  <Table.Th>What went well</Table.Th>
-                  <Table.Th>What did NOT go well</Table.Th>
+                  <Table.Th ta="center">Weekly Goal Completed?</Table.Th>
+                  <Table.Th>Results Related to Goal</Table.Th>
+                  <Table.Th>Committing to This Week</Table.Th>
+                  <Table.Th>What Went Well</Table.Th>
+                  <Table.Th>What Did Not Go Well</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -59,14 +60,12 @@ function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
                         {c.name}
                       </Text>
                     </Table.Td>
-                    <Table.Td>
-                      <Stack gap={6}>
-                        <Badge color={c.completedGoal === 'yes' ? 'teal' : 'red'}>
-                          {c.completedGoal === 'yes' ? 'Yes' : 'No'}
-                        </Badge>
-                        {cellText(c.results)}
-                      </Stack>
+                    <Table.Td ta="center">
+                      <Badge color={c.completedGoal === 'yes' ? 'teal' : 'red'}>
+                        {c.completedGoal === 'yes' ? 'Yes' : 'No'}
+                      </Badge>
                     </Table.Td>
+                    <Table.Td>{cellText(c.results)}</Table.Td>
                     <Table.Td>{cellText(c.commitments)}</Table.Td>
                     <Table.Td>{cellText(c.wins)}</Table.Td>
                     <Table.Td>{cellText(c.frictions)}</Table.Td>
