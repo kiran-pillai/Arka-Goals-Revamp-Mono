@@ -31,3 +31,14 @@ local_resource(
     resource_deps=['back-end'],
     labels=['app'],
 )
+
+dc_resource(
+    'mailhog', labels=['infra'])
+
+local_resource(
+    'db_migrate',
+    cmd='npx prisma migrate deploy && npx prisma db seed',
+    dir='./back-end',
+    auto_init= False,
+    resource_deps=['db'],
+)
