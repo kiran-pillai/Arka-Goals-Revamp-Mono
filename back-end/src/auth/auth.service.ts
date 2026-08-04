@@ -112,6 +112,15 @@ export class AuthService {
     });
   }
 
+  /**
+   * Mint an INVITE magic link for an email and send the invite email.
+   * Called by the invites flow after an invite row is created.
+   */
+  async sendInviteEmail(email: string): Promise<void> {
+    const url = await this.issueToken(email.trim().toLowerCase(), 'INVITE');
+    await this.mail.sendInviteLink(email, url);
+  }
+
   /** Mint a raw token, store only its hash, return the full magic-link URL. */
   private async issueToken(
     email: string,

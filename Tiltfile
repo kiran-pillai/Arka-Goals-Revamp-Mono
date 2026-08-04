@@ -3,10 +3,11 @@
 # Postgres runs in Docker Compose; the backend and frontend run standalone
 # as local processes on the host (they connect to Postgres at localhost:5432).
 
-# --- Postgres (Docker Compose) ---
+# --- Infra (Docker Compose) ---
 docker_compose('./docker-compose.yml')
 
 dc_resource('db', labels=['infra'])
+dc_resource('mailhog', labels=['infra'])
 
 # --- Backend (NestJS, standalone) ---
 local_resource(
@@ -14,11 +15,7 @@ local_resource(
     serve_cmd='npm run start:dev',
     serve_dir='./back-end',
     deps=['./back-end/src'],
-    resource_deps=['db'],
-    env={
-        'PORT': '3000',
-        'DATABASE_URL': 'postgresql://postgres:postgres@localhost:5432/arka',
-    },
+    resource_deps=['db', 'mailhog'],
     labels=['app'],
 )
 
@@ -30,15 +27,4 @@ local_resource(
     deps=['./front-end/src'],
     resource_deps=['back-end'],
     labels=['app'],
-)
-
-dc_resource(
-    'mailhog', labels=['infra'])
-
-local_resource(
-    'db_migrate',
-    cmd='npx prisma migrate deploy && npx prisma db seed',
-    dir='./back-end',
-    auto_init= False,
-    resource_deps=['db'],
 )
