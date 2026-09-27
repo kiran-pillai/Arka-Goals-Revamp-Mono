@@ -33,7 +33,23 @@ model User {
   createdAt   DateTime  @default(now())
   lastLoginAt DateTime?
 
-  invitesSent Invite[] @relation("InvitedBy")
+  invitesSent Invite[]  @relation("InvitedBy")
+  checkIns    CheckIn[]
+}
+
+model CheckIn {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedGoal Boolean
+  results       String
+  commitments   String
+  wins          String
+  frictions     String
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model Invite {

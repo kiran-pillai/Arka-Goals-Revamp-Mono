@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Full-width layout + button alignment</title>
+<style>
+  /* Design tokens lifted from the actual app: front-end/src/index.css and
+     front-end/src/WeeklyCheckIn.css (amber/bronze Arka theme). */
+  :root {
+    --amber: #e6a532;
+    --bronze: #a85f22;
+    --card-bg: #fffdf8;
+    --card-border: #ecdcc0;
+    --text: #6b6375;
+    --text-h: #08060d;
+    --bg: #fff;
+    --social-bg: rgba(244, 243, 236, 0.5);
+    --shadow: 0 10px 30px rgba(20, 16, 8, 0.08);
+    --ok: #12805c;
+    --warn: #a8410f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-h);
+    background:
+      radial-gradient(ellipse 90% 50% at 50% -8%, rgba(230,165,50,.18), transparent 70%),
+      var(--bg);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header.top { border-bottom: 1px solid var(--card-border); padding-bottom: 22px; margin-bottom: 34px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--bronze); font-weight: 700; margin: 0 0 8px;
+  }
+  h1 { font-size: 31px; line-height: 1.2; letter-spacing: -.5px; margin: 0 0 10px; }
+  .sub { margin: 0; color: var(--text); font-size: 15.5px; max-width: 74ch; }
+
+  h2 {
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--bronze); margin: 44px 0 16px; font-weight: 700;
+  }
+
+  /* ---- side-by-side comparison ---- */
+  .cmp { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+  @media (max-width: 900px) { .cmp { grid-template-columns: minmax(0,1fr); } }
+  .pane {
+    min-width: 0; border: 1px solid var(--card-border); border-radius: 16px;
+    background: var(--card-bg); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .pane-hd {
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    padding: 12px 16px; border-bottom: 1px solid var(--card-border);
+    background: var(--social-bg);
+  }
+  .pane-hd strong { font-size: 13.5px; }
+  .tag {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .tag.now  { background: rgba(168,65,15,.12);  color: var(--warn); }
+  .tag.next { background: rgba(18,128,92,.13);  color: var(--ok); }
+  .pane-bd { padding: 16px; }
+
+  /* ---- viewport mock ---- */
+  .vp {
+    position: relative; border: 1px dashed #cfc0a4; border-radius: 12px;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(230,165,50,.20), transparent 70%),
+      #fff;
+    padding: 14px; min-height: 250px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .vp-label {
+    position: absolute; top: 7px; right: 10px; font-size: 9.5px; letter-spacing: .6px;
+    color: #a08a63; text-transform: uppercase; font-weight: 700;
+  }
+  /* the "card" that we are removing */
+  .mockcard {
+    width: 100%; max-width: 250px; background: var(--card-bg);
+    border: 1px solid var(--card-border); border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(20,16,8,.09);
+    padding: 16px 14px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+  }
+  /* the full-bleed replacement */
+  .mockfull {
+    width: 100%; background: transparent; border: 0; border-radius: 0; box-shadow: none;
+    padding: 14px 8px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+  }
+  .m-brand {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--card-border); border-radius: 999px;
+    padding: 4px 11px 4px 4px; background: var(--social-bg);
+  }
+  .m-dot {
+    width: 17px; height: 17px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--amber), var(--bronze));
+  }
+  .m-org { font-size: 9.5px; letter-spacing: 2.4px; color: var(--bronze); font-weight: 700; }
+  .m-portrait {
+    width: 50px; height: 50px; border-radius: 50%; margin-top: 4px;
+    background: linear-gradient(135deg, var(--amber), var(--bronze));
+    box-shadow: 0 5px 12px rgba(168,95,34,.34);
+  }
+  .m-name {
+    font-size: 19px; font-weight: 700; letter-spacing: -.4px; margin: 3px 0 0;
+    background: linear-gradient(100deg, var(--amber), var(--bronze));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .m-tag { font-size: 10.5px; color: var(--text); margin: 0; }
+  .m-signed { font-size: 9.5px; color: var(--text); margin: 2px 0 0; }
+
+  /* buttons in the mock */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-weight: 600; border: 1px solid transparent;
+    white-space: nowrap; cursor: default;
+  }
+  .btn-solid { background: linear-gradient(180deg, var(--amber), #d9982c); color: #40260a; }
+  .btn-light { background: rgba(230,165,50,.16); color: var(--bronze); }
+  /* BEFORE: mismatched sizes (size="lg" vs size="md") */
+  .btn-lg { height: 40px; font-size: 14px; padding: 0 20px; }
+  .btn-md { height: 33px; font-size: 12.5px; padding: 0 14px; }
+  /* AFTER: identical size, stretched to a shared width */
+  .btn-eq { height: 38px; font-size: 13.5px; padding: 0 18px; width: 100%; }
+
+  .stack-loose { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 100%; }
+  .stack-eq { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 260px; margin-top: 4px; }
+
+  /* alignment guide lines to make the misalignment legible */
+  .guides { position: relative; width: 100%; max-width: 260px; }
+  .guides::before, .guides::after {
+    content: ""; position: absolute; top: -3px; bottom: -3px; width: 1px;
+    background: repeating-linear-gradient(to bottom, #d2453a 0 4px, transparent 4px 8px);
+  }
+  .guides::before { left: 0; }
+  .guides::after { right: 0; }
+
+  .note { font-size: 12.5px; color: var(--text); margin: 11px 2px 0; }
+  .note b { color: var(--text-h); }
+
+  /* ---- change list ---- */
+  .changes { display: grid; gap: 10px; margin-top: 6px; }
+  .chg {
+    display: grid; grid-template-columns: 26px minmax(0,1fr); gap: 12px; align-items: start;
+    border: 1px solid var(--card-border); border-radius: 12px;
+    background: var(--card-bg); padding: 13px 15px;
+  }
+  .num {
+    width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--amber), var(--bronze));
+    color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .chg h3 { margin: 2px 0 4px; font-size: 14.5px; }
+  .chg p { margin: 0; font-size: 13px; color: var(--text); }
+  .chg code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11.5px; background: rgba(230,165,50,.14); color: var(--bronze);
+    padding: 1px 5px; border-radius: 4px; word-break: break-word;
+  }
+  .file {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px; color: #8d7a5c; display: block; margin-top: 6px;
+  }
+
+  /* ---- open question ---- */
+  .ask {
+    margin-top: 16px; border: 1px solid #e4cf9f; border-left: 3px solid var(--amber);
+    border-radius: 12px; background: rgba(230,165,50,.09); padding: 15px 17px;
+  }
+  .ask h3 { margin: 0 0 6px; font-size: 14.5px; }
+  .ask p { margin: 0 0 10px; font-size: 13px; color: var(--text); }
+  .opts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  @media (max-width: 760px) { .opts { grid-template-columns: minmax(0,1fr); } }
+  .opt { border: 1px solid var(--card-border); border-radius: 10px; background: var(--card-bg); padding: 11px 13px; }
+  .opt strong { font-size: 13px; display: block; margin-bottom: 3px; }
+  .opt span { font-size: 12px; color: var(--text); }
+  .rec { font-size: 10px; font-weight: 700; color: var(--ok); letter-spacing: .7px; text-transform: uppercase; }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --card-bg: #1d1a15; --card-border: #3a3226; --amber: #f0b849; --bronze: #d08a3a;
+      --text: #9ca3af; --text-h: #f3f4f6; --bg: #16171d;
+      --social-bg: rgba(47,48,58,.5); --shadow: 0 10px 30px rgba(0,0,0,.34);
+      --ok: #4ec99f; --warn: #e79a6a;
+    }
+    .vp { background: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(230,165,50,.13), transparent 70%), #16171d; border-color: #4a4030; }
+    .btn-solid { color: #2b1a06; }
+    .ask { border-color: #5b4a2c; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Home screen · layout change · applied</p>
+    <h1>Full-width layout, aligned primary buttons</h1>
+    <p class="sub">
+      The signed-in home screen no longer uses a centered card &mdash; content spans the
+      viewport up to a <b>1600px</b> readable cap &mdash; and <b>Enter Weekly Form</b> and
+      <b>View check-ins</b> now render at identical size and width. Typecheck and build pass.
+    </p>
+  </header>
+
+  <h2>Before vs after</h2>
+  <div class="cmp">
+
+    <!-- BEFORE -->
+    <div class="pane">
+      <div class="pane-hd">
+        <strong>Before</strong>
+        <span class="tag now">620px card</span>
+        <span class="tag now">buttons mismatched</span>
+      </div>
+      <div class="pane-bd">
+        <div class="vp">
+          <span class="vp-label">viewport</span>
+          <div class="mockcard">
+            <div class="m-brand"><div class="m-dot"></div><span class="m-org">ARKA</span></div>
+            <div class="m-portrait"></div>
+            <p class="m-name">Cheetah Squad</p>
+            <p class="m-tag">Q3 Goals Cup · Lock in.</p>
+            <p class="m-signed">Signed in as you@arka.local</p>
+            <div class="stack-loose">
+              <div class="guides" style="display:grid;justify-items:center;gap:7px">
+                <span class="btn btn-solid btn-lg">Enter Weekly Form</span>
+                <span class="btn btn-light btn-md">View check-ins</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          Content was capped at <b>620px</b> and centered, leaving most of the screen empty
+          glow. The buttons were separate block elements at <code>size="lg"</code> and
+          <code>size="md"</code>, so they differed in <b>height and width</b> and shared only a
+          center line (dashed guides show the edge mismatch).
+        </p>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="pane">
+      <div class="pane-hd">
+        <strong>After</strong>
+        <span class="tag next">full width · 1600px cap</span>
+        <span class="tag next">buttons matched</span>
+      </div>
+      <div class="pane-bd">
+        <div class="vp">
+          <span class="vp-label">viewport</span>
+          <div class="mockfull">
+            <div class="m-brand"><div class="m-dot"></div><span class="m-org">ARKA</span></div>
+            <div class="m-portrait"></div>
+            <p class="m-name">Cheetah Squad</p>
+            <p class="m-tag">Q3 Goals Cup · Lock in.</p>
+            <p class="m-signed">Signed in as you@arka.local</p>
+            <div class="guides">
+              <div class="stack-eq" style="max-width:none">
+                <span class="btn btn-solid btn-eq">Enter Weekly Form</span>
+                <span class="btn btn-light btn-eq">View check-ins</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          No card: no border, background, or shadow — the screen fills the viewport with only
+          padding as a gutter, up to a <b>1600px</b> cap. Both buttons use <b>one size</b> and
+          stretch to a <b>shared width</b>, so their left and right edges line up exactly.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h2>What changed</h2>
+  <div class="changes">
+    <div class="chg">
+      <div class="num">1</div>
+      <div>
+        <h3>Screen is full-bleed</h3>
+        <p>
+          Dropped <code>border</code>, <code>background</code>, <code>border-radius</code>, and
+          <code>box-shadow</code> from <code>.squad-card</code>, and raised
+          <code>max-width</code> from <code>620px</code> to the new
+          <code>--content-max: 1600px</code> token. Padding is now the only gutter.
+          <span class="file">front-end/src/WeeklyCheckIn.css</span>
+        </p>
+      </div>
+    </div>
+    <div class="chg">
+      <div class="num">2</div>
+      <div>
+        <h3>Buttons are equalized</h3>
+        <p>
+          <b>View check-ins</b> moved from <code>size="md"</code> to <code>size="lg"</code> to
+          match, and both now sit in one <code>&lt;Stack gap="sm" mx="auto" maw={320}&gt;</code>
+          with <code>fullWidth</code> — so they share a width instead of each hugging its label.
+          <span class="file">front-end/src/routes/HomeRoute.tsx</span>
+        </p>
+      </div>
+    </div>
+    <div class="chg">
+      <div class="num">3</div>
+      <div>
+        <h3>Check-ins table widened</h3>
+        <p>
+          <code>.checkins-card</code> went from a <code>1040px</code> cap to the shared
+          <code>1600px</code> token, giving its six free-text columns noticeably more room.
+          <span class="file">front-end/src/WeeklyCheckIn.css</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>Decision: full-width with a wide cap &mdash; implemented</h3>
+    <p>
+      Content now fills the viewport with padding as the only gutter, capped at
+      <code>1600px</code> so centered text and the table stay readable on ultra-wide displays.
+      The cap is a single token, <code>--content-max</code> on <code>.squad-screen</code>, so
+      it can be widened or removed in one place.
+    </p>
+    <div class="opts">
+      <div class="opt">
+        <strong>Landing &amp; form</strong>
+        <span>Card chrome removed entirely; <code>48px 40px</code> padding, <code>16px</code> side padding under 480px.</span>
+      </div>
+      <div class="opt">
+        <strong>Buttons</strong>
+        <span>Both <code>size="lg"</code> + <code>fullWidth</code> in a <code>maw={320}</code> Stack &mdash; identical height and width.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

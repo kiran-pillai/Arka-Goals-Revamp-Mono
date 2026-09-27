@@ -1,10 +1,20 @@
-import { Badge, Button, Group, Stack, Table, Text, Title } from '@mantine/core'
-import type { CheckIn } from './checkin'
+import { useState } from 'react'
+import {
+  Badge,
+  Button,
+  Group,
+  SegmentedControl,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from '@mantine/core'
+import { useCheckIns } from './lib/checkins'
 import './WeeklyCheckIn.css'
 
 type CheckInsTableProps = {
-  checkIns: CheckIn[]
   onAddAnother: () => void
+  onBack: () => void
 }
 
 function cellText(value: string) {
@@ -19,7 +29,13 @@ function cellText(value: string) {
   )
 }
 
-function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
+function CheckInsTable({ onAddAnother, onBack }: CheckInsTableProps) {
+  // Defaults to the current user's own check-ins; toggle to see the squad.
+  const [scope, setScope] = useState<'mine' | 'squad'>('mine')
+  const checkIns = useCheckIns(scope === 'mine')
+
+  const rows = checkIns.data ?? []
+
   return (
     <main className="squad-screen">
       <div className="squad-card checkins-card">
@@ -27,12 +43,32 @@ function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
           <Title order={1} fz={30}>
             Squad Check-ins
           </Title>
-          <Button color="arka" onClick={onAddAnother}>
-            Add another check-in
-          </Button>
+          <Group gap="xs" wrap="nowrap">
+            <Button variant="subtle" color="arka" onClick={onBack}>
+              Back
+            </Button>
+            <Button color="arka" onClick={onAddAnother}>
+              Add another check-in
+            </Button>
+          </Group>
         </Group>
 
-        {checkIns.length === 0 ? (
+        <SegmentedControl
+          value={scope}
+          onChange={(v) => setScope(v as 'mine' | 'squad')}
+          data={[
+            { label: 'My check-ins', value: 'mine' },
+            { label: 'Whole squad', value: 'squad' },
+          ]}
+          color="arka"
+          mb="lg"
+        />
+
+        {checkIns.isLoading ? (
+          <Stack align="center" py="xl">
+            <Text c="dimmed">Loading…</Text>
+          </Stack>
+        ) : rows.length === 0 ? (
           <Stack align="center" gap={4} py="xl">
             <Text fw={600}>No check-ins yet</Text>
             <Text c="dimmed" size="sm">
@@ -44,7 +80,7 @@ function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
             <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Member</Table.Th>
                   <Table.Th ta="center">Weekly Goal Completed?</Table.Th>
                   <Table.Th>Results Related to Goal</Table.Th>
                   <Table.Th>Committing to This Week</Table.Th>
@@ -53,16 +89,16 @@ function CheckInsTable({ checkIns, onAddAnother }: CheckInsTableProps) {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {checkIns.map((c, i) => (
-                  <Table.Tr key={i}>
+                {rows.map((c) => (
+                  <Table.Tr key={c.id}>
                     <Table.Td>
                       <Text size="sm" fw={600}>
-                        {c.name}
+                        {c.user.email}
                       </Text>
                     </Table.Td>
                     <Table.Td ta="center">
-                      <Badge color={c.completedGoal === 'yes' ? 'teal' : 'red'}>
-                        {c.completedGoal === 'yes' ? 'Yes' : 'No'}
+                      <Badge color={c.completedGoal ? 'teal' : 'red'}>
+                        {c.completedGoal ? 'Yes' : 'No'}
                       </Badge>
                     </Table.Td>
                     <Table.Td>{cellText(c.results)}</Table.Td>

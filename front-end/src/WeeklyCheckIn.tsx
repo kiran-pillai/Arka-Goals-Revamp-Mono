@@ -1,26 +1,24 @@
 import { useState } from 'react'
 import {
+  Alert,
   Button,
   Group,
   Radio,
   Stack,
   Text,
   Textarea,
-  TextInput,
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import type { CheckIn } from './checkin'
+import { useCreateCheckIn } from './lib/checkins'
 import './WeeklyCheckIn.css'
 
 type WeeklyCheckInProps = {
   onBack: () => void
-  onSubmit: (checkIn: CheckIn) => void
   onViewCheckIns: () => void
 }
 
 type FormValues = {
-  name: string
   completedGoal: '' | 'yes' | 'no'
   results: string
   commitments: string
@@ -28,12 +26,12 @@ type FormValues = {
   frictions: string
 }
 
-function WeeklyCheckIn({ onBack, onSubmit, onViewCheckIns }: WeeklyCheckInProps) {
+function WeeklyCheckIn({ onBack, onViewCheckIns }: WeeklyCheckInProps) {
   const [submitted, setSubmitted] = useState(false)
+  const createCheckIn = useCreateCheckIn()
 
   const form = useForm<FormValues>({
     initialValues: {
-      name: '',
       completedGoal: '',
       results: '',
       commitments: '',
@@ -41,20 +39,22 @@ function WeeklyCheckIn({ onBack, onSubmit, onViewCheckIns }: WeeklyCheckInProps)
       frictions: '',
     },
     validate: {
-      name: (value) => (value.trim() ? null : 'Please enter your name.'),
       completedGoal: (value) =>
         value ? null : 'Let us know if you completed your goal.',
     },
   })
 
   function handleSubmit(values: FormValues) {
-    // TODO: POST to back-end once auth ties check-ins to users.
-    onSubmit({
-      ...values,
-      name: values.name.trim(),
-      completedGoal: values.completedGoal as CheckIn['completedGoal'],
-    })
-    setSubmitted(true)
+    createCheckIn.mutate(
+      {
+        completedGoal: values.completedGoal === 'yes',
+        results: values.results,
+        commitments: values.commitments,
+        wins: values.wins,
+        frictions: values.frictions,
+      },
+      { onSuccess: () => setSubmitted(true) },
+    )
   }
 
   return (
@@ -96,12 +96,11 @@ function WeeklyCheckIn({ onBack, onSubmit, onViewCheckIns }: WeeklyCheckInProps)
 
             <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
               <Stack gap="lg">
-                <TextInput
-                  label="Name"
-                  placeholder="Your name"
-                  withAsterisk
-                  {...form.getInputProps('name')}
-                />
+                {createCheckIn.isError && (
+                  <Alert color="red" variant="light">
+                    Couldn&rsquo;t save your check-in. Please try again.
+                  </Alert>
+                )}
 
                 <Radio.Group
                   label="Did you complete your weekly goal?"
@@ -153,7 +152,7 @@ function WeeklyCheckIn({ onBack, onSubmit, onViewCheckIns }: WeeklyCheckInProps)
                   <Button variant="subtle" color="arka" onClick={onBack}>
                     Back
                   </Button>
-                  <Button type="submit" color="arka">
+                  <Button type="submit" color="arka" loading={createCheckIn.isPending}>
                     Submit check-in
                   </Button>
                 </Group>

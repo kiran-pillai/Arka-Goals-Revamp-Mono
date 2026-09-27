@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import './Login.css'
+import { useMutation } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import '../Login.css'
 
-function Login() {
+export default function LoginRoute() {
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+
+  const requestLink = useMutation({
+    mutationFn: (addr: string) =>
+      api('/auth/request-link', { method: 'POST', body: { email: addr } }),
+  })
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -15,9 +21,10 @@ function Login() {
       return
     }
     setError('')
-    // TODO: POST to back-end to trigger the invite-only magic sign-in link.
-    setSent(true)
+    requestLink.mutate(trimmed)
   }
+
+  const sent = requestLink.isSuccess
 
   return (
     <main className="login">
@@ -49,7 +56,10 @@ function Login() {
             <button
               type="button"
               className="link-btn"
-              onClick={() => setSent(false)}
+              onClick={() => {
+                requestLink.reset()
+                setEmail('')
+              }}
             >
               Use a different email
             </button>
@@ -71,8 +81,13 @@ function Login() {
               }}
             />
             {error && <p className="field-error" role="alert">{error}</p>}
-            <button type="submit" className="submit">
-              Send my sign-in link
+            {requestLink.isError && (
+              <p className="field-error" role="alert">
+                Something went wrong. Please try again.
+              </p>
+            )}
+            <button type="submit" className="submit" disabled={requestLink.isPending}>
+              {requestLink.isPending ? 'Sending…' : 'Send my sign-in link'}
             </button>
             <p className="hint">
               Cheetah Squad is invite-only. We&rsquo;ll email you a secure link&mdash;
@@ -88,5 +103,3 @@ function Login() {
     </main>
   )
 }
-
-export default Login

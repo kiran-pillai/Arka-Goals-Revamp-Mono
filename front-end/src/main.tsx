@@ -1,9 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MantineProvider, createTheme } from '@mantine/core'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider } from '@tanstack/react-router'
 import '@mantine/core/styles.css'
 import './index.css'
-import App from './App.tsx'
+import { router } from './router'
+import { AuthProvider, useAuth } from './auth/AuthContext'
 
 // Amber/bronze "Arka / Cheetah Squad" palette (light -> dark ramp).
 const theme = createTheme({
@@ -25,10 +28,27 @@ const theme = createTheme({
   fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
 })
 
+const queryClient = new QueryClient()
+
+/**
+ * Feeds the live auth state into the router context so route `beforeLoad`
+ * guards see the current user. While /auth/me is loading we render nothing to
+ * avoid a flash of the login screen before auth resolves.
+ */
+function RoutedApp() {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  return <RouterProvider router={router} context={{ auth: { user } }} />
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RoutedApp />
+        </AuthProvider>
+      </QueryClientProvider>
     </MantineProvider>
   </StrictMode>,
 )

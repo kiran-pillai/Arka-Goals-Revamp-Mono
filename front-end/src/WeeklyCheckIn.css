@@ -3,6 +3,8 @@
 .squad-screen {
   --amber: #e6a532;
   --bronze: #a85f22;
+  /* Readable ceiling for full-width content on ultra-wide displays. */
+  --content-max: 1600px;
   --card-bg: #fffdf8;
   --card-border: #ecdcc0;
   --glow: radial-gradient(
@@ -21,24 +23,23 @@
   background: var(--glow), var(--bg);
 }
 
+/* Full-bleed: no card chrome. Content spans the viewport with padding as the
+   only gutter, capped at --content-max so centered text stays readable on
+   ultra-wide monitors. */
 .squad-card {
   width: 100%;
-  max-width: 620px;
+  max-width: var(--content-max, 1600px);
   box-sizing: border-box;
-  padding: 48px 44px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  box-shadow: var(--shadow);
+  padding: 48px 40px;
 }
 
 .squad-card.is-landing {
   text-align: center;
 }
 
-/* The table needs more room than the form/landing card. */
+/* The table has six free-text columns, so let it use the full cap. */
 .squad-card.checkins-card {
-  max-width: 1040px;
+  max-width: var(--content-max, 1600px);
 }
 
 /* --- Arka org lockup --- */
@@ -149,7 +150,7 @@
 
 @media (max-width: 480px) {
   .squad-card {
-    padding: 32px 22px;
+    padding: 32px 16px;
   }
   .squad-name {
     font-size: 28px;
