@@ -3,11 +3,13 @@ import { Button, Group, Stack, Text } from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
 import WeeklyCheckIn from '../WeeklyCheckIn'
 import CheckInsTable from '../CheckInsTable'
+import GoalSetup from '../GoalSetup'
+import GoalsTable from '../GoalsTable'
 import { useAuth } from '../auth/AuthContext'
 import '../WeeklyCheckIn.css'
 import '../App.css'
 
-type View = 'landing' | 'form' | 'table'
+type View = 'landing' | 'form' | 'table' | 'goals-setup' | 'goals-table'
 
 export default function HomeRoute() {
   const [view, setView] = useState<View>('landing')
@@ -27,6 +29,24 @@ export default function HomeRoute() {
     return (
       <CheckInsTable
         onAddAnother={() => setView('form')}
+        onBack={() => setView('landing')}
+      />
+    )
+  }
+
+  if (view === 'goals-setup') {
+    return (
+      <GoalSetup
+        onBack={() => setView('landing')}
+        onViewGoals={() => setView('goals-table')}
+      />
+    )
+  }
+
+  if (view === 'goals-table') {
+    return (
+      <GoalsTable
+        onAddGoal={() => setView('goals-setup')}
         onBack={() => setView('landing')}
       />
     )
@@ -75,6 +95,27 @@ export default function HomeRoute() {
             onClick={() => setView('table')}
           >
             View check-ins
+          </Button>
+
+          <Button
+            color="arka"
+            size="lg"
+            radius="md"
+            fullWidth
+            onClick={() => setView('goals-setup')}
+          >
+            Set Goals
+          </Button>
+
+          <Button
+            variant="light"
+            color="arka"
+            size="lg"
+            radius="md"
+            fullWidth
+            onClick={() => setView('goals-table')}
+          >
+            View Goals
           </Button>
         </Stack>
 

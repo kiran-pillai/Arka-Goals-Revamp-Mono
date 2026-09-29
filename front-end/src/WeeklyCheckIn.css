@@ -42,6 +42,24 @@
   max-width: var(--content-max, 1600px);
 }
 
+/* Table view starts at the top, not centred. */
+.squad-screen.is-table {
+  justify-content: flex-start;
+  padding-top: 0;
+}
+
+.checkins-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--content-max, 1600px);
+  box-sizing: border-box;
+  padding: 20px 40px 16px;
+  background: var(--glow), var(--bg);
+  backdrop-filter: blur(12px);
+}
+
 /* --- Arka org lockup --- */
 .brand {
   display: inline-flex;
@@ -151,6 +169,9 @@
 @media (max-width: 480px) {
   .squad-card {
     padding: 32px 16px;
+  }
+  .checkins-sticky-header {
+    padding: 16px 16px 12px;
   }
   .squad-name {
     font-size: 28px;

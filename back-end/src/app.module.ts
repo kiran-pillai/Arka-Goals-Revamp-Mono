@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { InvitesModule } from './invites/invites.module';
 import { CheckInsModule } from './checkins/checkins.module';
+import { GoalsModule } from './goals/goals.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -15,6 +16,7 @@ import configuration from './config/configuration';
     AuthModule,
     InvitesModule,
     CheckInsModule,
+    GoalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

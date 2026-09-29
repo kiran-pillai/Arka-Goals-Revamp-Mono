@@ -112,27 +112,6 @@ The existing weekly form is both a goal-entry and a reflection ritual. The app's
 - **Historical/period views**: filter progress and standings by week, month, or the full quarter.
 - **Peer visibility**: see other men's active goals and completions for accountability (respecting the group's support-team structure).
 
-
-#### Data migration / import
-The app goes live mid-quarter, so existing data must be brought in before the leaderboard and streaks are meaningful. Split by data source:
-
-**Manual re-entry (quarterly goals & give-ups)**
-Historical give-up and quarterly data is free-text and too ambiguous to reliably parse (especially whether a give-up was actually kept). Instead, have each man re-type these on first login:
-- **Guided backfill prompt**: on first login, ask each man to re-enter his quarterly goal (or monthly goals) and any give-ups, with their current status.
-- **Give-up streak entry**: capture how many consecutive months a give-up has been maintained so streak bonuses (+5 / +10) can be applied going forward.
-- **Commissioner review**: give-ups/quarterly entries flow to the commissioner for a sanity check before points are locked in, matching the existing "fluffy goals will be challenged" norm.
-
-**Automated import (weekly goals)**
-Weekly goals since the start of the quarter already exist as structured Google Form responses. Import the free-text fields, but let men confirm completion themselves:
-- **Import the free-text fields** from each weekly form response: the weekly goal / actions committed to that week, what went well, and what did not go well.
-- **Preserve timing & period**: submission timestamp and which week each response belonged to, so on-time scoring is accurate.
-- **Self-marked completion on first login**: because completion isn't reliably derivable from the free-text responses, present each man his imported weekly goals and have him mark each one completed / not completed. Weekly completion points are only scored after this confirmation.
-- **Backfill on-time credit** automatically from the submission timestamps (the 2.5 on-time portion), leaving only the completion portion to the man's self-marking.
-- **Name → account reconciliation**: match form entries to invited users (handle nicknames/typos), with manual override for ambiguous rows.
-- **Dry-run + validation report**: preview what will import, flag unparseable/unmatched rows before committing.
-- **Idempotent & re-runnable**: keyed on man + week so re-running doesn't create duplicates.
-- **Audit trail**: log every imported record through the same audit/history log, tagged "imported."
-
 #### Admin / commissioner tools
 - **Member & invite management**: send/revoke email invites, assign men to support teams (non-static across the quarter).
 - **Competition config**: define quarters, deadlines, point values, and team rosters per season so the app is reusable for Q4 and beyond.
