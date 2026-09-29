@@ -37,33 +37,41 @@ function CheckInsTable({ onAddAnother, onBack }: CheckInsTableProps) {
   const rows = checkIns.data ?? []
 
   return (
-    <main className="squad-screen">
-      <div className="squad-card checkins-card">
-        <Group justify="space-between" align="center" mb="lg" wrap="nowrap">
-          <Title order={1} fz={30}>
-            Squad Check-ins
-          </Title>
-          <Group gap="xs" wrap="nowrap">
-            <Button variant="subtle" color="arka" onClick={onBack}>
-              Back
-            </Button>
+    <main className="squad-screen is-table">
+      <div className="checkins-sticky-header">
+        <Stack gap="sm">
+          <Button
+            variant="subtle"
+            color="arka"
+            onClick={onBack}
+            w="fit-content"
+            px={0}
+          >
+            ← Back
+          </Button>
+
+          <Group justify="space-between" align="flex-end">
+            <Title order={1} fz={30}>
+              Squad Check-ins
+            </Title>
             <Button color="arka" onClick={onAddAnother}>
               Add another check-in
             </Button>
           </Group>
-        </Group>
 
-        <SegmentedControl
-          value={scope}
-          onChange={(v) => setScope(v as 'mine' | 'squad')}
-          data={[
-            { label: 'My check-ins', value: 'mine' },
-            { label: 'Whole squad', value: 'squad' },
-          ]}
-          color="arka"
-          mb="lg"
-        />
+          <SegmentedControl
+            value={scope}
+            onChange={(v) => setScope(v as 'mine' | 'squad')}
+            data={[
+              { label: 'My check-ins', value: 'mine' },
+              { label: 'Whole squad', value: 'squad' },
+            ]}
+            color="arka"
+          />
+        </Stack>
+      </div>
 
+      <div className="squad-card checkins-card" style={{ paddingTop: 0 }}>
         {checkIns.isLoading ? (
           <Stack align="center" py="xl">
             <Text c="dimmed">Loading…</Text>
