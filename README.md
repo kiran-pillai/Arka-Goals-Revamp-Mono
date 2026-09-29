@@ -18,6 +18,45 @@ A weekly goal-tracking app for squads within the Arka organization. Squad member
 - **Docker** & **Docker Compose**
 - **Tilt** (optional — orchestrates everything in one command)
 
+### Installing Docker
+
+Docker Desktop includes both `docker` and `docker compose`.
+
+- **macOS**: Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) or install via Homebrew:
+  ```sh
+  brew install --cask docker
+  ```
+- **Windows**: Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/). Requires WSL 2 — the installer will prompt you to enable it if needed.
+- **Linux**: Install Docker Engine and the Compose plugin following the official guide for your distro at [docs.docker.com/engine/install](https://docs.docker.com/engine/install/).
+
+After installing, verify with:
+```sh
+docker --version
+docker compose version
+```
+
+### Installing Tilt
+
+Tilt watches your files, rebuilds, and restarts services automatically.
+
+- **macOS**:
+  ```sh
+  brew install tilt-dev/tap/tilt
+  ```
+- **Windows**:
+  ```sh
+  iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.ps1'))
+  ```
+- **Linux / manual**:
+  ```sh
+  curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
+  ```
+
+After installing, verify with:
+```sh
+tilt version
+```
+
 ## Quick Start (with Tilt)
 
 ```sh
