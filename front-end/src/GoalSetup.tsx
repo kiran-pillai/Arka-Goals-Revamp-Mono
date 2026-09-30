@@ -14,14 +14,9 @@ import {
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { useNavigate } from '@tanstack/react-router'
 import { useCreateGoal } from './lib/goals'
 import type { GoalType, MeasureType, GoalPeriodChoice } from './goal'
-import './WeeklyCheckIn.css'
-
-type GoalSetupProps = {
-  onBack: () => void
-  onViewGoals: () => void
-}
 
 type Step = 'choose-period' | 'enter-goal'
 
@@ -33,11 +28,12 @@ type FormValues = {
   targetValue: number | ''
 }
 
-function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
+export default function GoalSetup() {
   const [step, setStep] = useState<Step>('choose-period')
   const [periodChoice, setPeriodChoice] = useState<GoalPeriodChoice | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const createGoal = useCreateGoal()
+  const navigate = useNavigate()
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -82,212 +78,197 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
     )
   }
 
-  return (
-    <main className="squad-screen">
-      <div className={`squad-card${step === 'choose-period' && !submitted ? ' is-landing' : ''}`}>
-        <header className="brand">
-          <img className="brand-arka" src="/images/Arka_Icon.webp" alt="Arka" />
-          <span className="brand-org">ARKA</span>
-        </header>
+  if (submitted) {
+    return (
+      <Stack align="center" gap="sm" py="xl">
+        <svg viewBox="0 0 24 24" aria-hidden="true" style={{ width: 52, height: 52, color: '#a85f22', padding: 12, borderRadius: '50%', background: 'rgba(230, 165, 50, 0.15)', boxSizing: 'border-box' }}>
+          <path
+            d="M20 6 9 17l-5-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <Title order={2}>Goal saved</Title>
+        <Text c="dimmed">
+          Your {periodChoice?.toLowerCase() ?? ''} goal is locked in. Stay accountable.
+        </Text>
+        <Group mt="sm" gap="sm">
+          <Button color="arka" onClick={() => navigate({ to: '/goals' })}>
+            View goals
+          </Button>
+          <Button
+            variant="light"
+            color="arka"
+            onClick={() => {
+              setSubmitted(false)
+              form.reset()
+              setStep('choose-period')
+              setPeriodChoice(null)
+            }}
+          >
+            Add another goal
+          </Button>
+        </Group>
+      </Stack>
+    )
+  }
 
-        {submitted ? (
-          <div className="checkin-sent" role="status">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M20 6 9 17l-5-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <Title order={2}>Goal saved</Title>
-            <Text c="dimmed">
-              Your {periodChoice?.toLowerCase() ?? ''} goal is locked in. Stay accountable.
-            </Text>
-            <Group mt="sm" gap="sm">
-              <Button color="arka" onClick={onViewGoals}>
-                View goals
-              </Button>
-              <Button
-                variant="light"
-                color="arka"
-                onClick={() => {
-                  setSubmitted(false)
-                  form.reset()
-                  setStep('choose-period')
-                  setPeriodChoice(null)
-                }}
-              >
-                Add another goal
-              </Button>
-            </Group>
-          </div>
-        ) : step === 'choose-period' ? (
-          <>
-            <Title order={1} mt="xl" mb={4} fz={34}>
-              Set Your Goals
-            </Title>
-            <Text c="dimmed" mb="md">
-              First things first — choose your goal cadence for this quarter.
-            </Text>
+  if (step === 'choose-period') {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <Title order={1} mt="xl" mb={4} fz={34}>
+          Set Your Goals
+        </Title>
+        <Text c="dimmed" mb="md">
+          First things first — choose your goal cadence for this quarter.
+        </Text>
 
-            <Text fw={600} size="lg">
-              Monthly or Quarterly?
-            </Text>
-            <Text size="sm" c="dimmed" mt={4}>
-              You can choose one or the other, not both. Monthly goals are set fresh
-              each month (20 pts each). A quarterly goal spans the full quarter (60 pts).
-            </Text>
+        <Text fw={600} size="lg">
+          Monthly or Quarterly?
+        </Text>
+        <Text size="sm" c="dimmed" mt={4}>
+          You can choose one or the other, not both. Monthly goals are set fresh
+          each month (20 pts each). A quarterly goal spans the full quarter (60 pts).
+        </Text>
 
-            <Group justify="center" gap="md" mt="xl">
-              <Button
-                color="arka"
-                size="lg"
-                radius="md"
-                w={180}
-                onClick={() => handlePeriodNext('MONTHLY')}
-              >
-                Monthly
-              </Button>
-              <Button
-                variant="light"
-                color="arka"
-                size="lg"
-                radius="md"
-                w={180}
-                onClick={() => handlePeriodNext('QUARTERLY')}
-              >
-                Quarterly
-              </Button>
-            </Group>
-
-            <Group justify="flex-start" mt="lg">
-              <Button variant="subtle" color="arka" size="sm" onClick={onBack}>
-                Back
-              </Button>
-            </Group>
-          </>
-        ) : (
-          <>
-            <Title order={1} mt="xl" mb={4} fz={34}>
-              New {periodChoice === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal
-            </Title>
-            <Text c="dimmed" mb="xl">
-              Goals must be specific and measurable. Stack at your own risk — it's
-              all or nothing.
-            </Text>
-
-            <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-              <Stack gap="lg">
-                {createGoal.isError && (
-                  <Alert color="red" variant="light">
-                    {(createGoal.error as Error)?.message ??
-                      "Couldn’t save your goal. Please try again."}
-                  </Alert>
-                )}
-
-                <div>
-                  <Badge color="arka" variant="light" size="lg" mb="xs">
-                    {periodChoice}
-                  </Badge>
-                </div>
-
-                <SegmentedControl
-                  fullWidth
-                  value={form.values.type || undefined}
-                  onChange={(v) => form.setFieldValue('type', v as GoalType)}
-                  data={
-                    periodChoice === 'MONTHLY'
-                      ? [
-                          { label: 'Monthly Goal', value: 'MONTHLY' },
-                          { label: 'Weekly Goal', value: 'WEEKLY' },
-                          { label: 'Give-Up', value: 'GIVE_UP' },
-                        ]
-                      : [
-                          { label: 'Quarterly Goal', value: 'QUARTERLY' },
-                          { label: 'Weekly Goal', value: 'WEEKLY' },
-                          { label: 'Give-Up', value: 'GIVE_UP' },
-                        ]
-                  }
-                  color="arka"
-                />
-
-                <TextInput
-                  label="Goal title"
-                  placeholder="e.g. Submit 100 job applications"
-                  withAsterisk
-                  {...form.getInputProps('title')}
-                />
-
-                <Textarea
-                  label="Description (optional)"
-                  placeholder="Add details, milestones, or context..."
-                  autosize
-                  minRows={2}
-                  {...form.getInputProps('description')}
-                />
-
-                <Radio.Group
-                  label="How is this goal measured?"
-                  withAsterisk
-                  {...form.getInputProps('measureType')}
-                >
-                  <Group mt="xs">
-                    <Radio
-                      value="ACTION_BASED"
-                      label="Action-based (numeric target)"
-                      color="arka"
-                    />
-                    <Radio
-                      value="PASS_FAIL"
-                      label="Pass/fail (yes or no)"
-                      color="arka"
-                    />
-                  </Group>
-                </Radio.Group>
-
-                {form.values.measureType === 'ACTION_BASED' && (
-                  <NumberInput
-                    label="Target number"
-                    placeholder="e.g. 100"
-                    min={1}
-                    withAsterisk
-                    {...form.getInputProps('targetValue')}
-                  />
-                )}
-
-                <Group justify="space-between" mt="sm">
-                  <Button
-                    variant="subtle"
-                    color="arka"
-                    onClick={() => {
-                      setStep('choose-period')
-                      form.reset()
-                    }}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    type="submit"
-                    color="arka"
-                    loading={createGoal.isPending}
-                  >
-                    Save goal
-                  </Button>
-                </Group>
-              </Stack>
-            </form>
-          </>
-        )}
+        <Group justify="center" gap="md" mt="xl">
+          <Button
+            color="arka"
+            size="lg"
+            radius="md"
+            w={180}
+            onClick={() => handlePeriodNext('MONTHLY')}
+          >
+            Monthly
+          </Button>
+          <Button
+            variant="light"
+            color="arka"
+            size="lg"
+            radius="md"
+            w={180}
+            onClick={() => handlePeriodNext('QUARTERLY')}
+          >
+            Quarterly
+          </Button>
+        </Group>
       </div>
+    )
+  }
 
-      <footer className="squad-footer">
-        <span>An Arka organization squad</span>
-      </footer>
-    </main>
+  return (
+    <>
+      <Title order={1} mb={4} fz={34}>
+        New {periodChoice === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal
+      </Title>
+      <Text c="dimmed" mb="xl">
+        Goals must be specific and measurable. Stack at your own risk — it's
+        all or nothing.
+      </Text>
+
+      <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
+        <Stack gap="lg">
+          {createGoal.isError && (
+            <Alert color="red" variant="light">
+              {(createGoal.error as Error)?.message ??
+                "Couldn't save your goal. Please try again."}
+            </Alert>
+          )}
+
+          <div>
+            <Badge color="arka" variant="light" size="lg" mb="xs">
+              {periodChoice}
+            </Badge>
+          </div>
+
+          <SegmentedControl
+            fullWidth
+            value={form.values.type || undefined}
+            onChange={(v) => form.setFieldValue('type', v as GoalType)}
+            data={
+              periodChoice === 'MONTHLY'
+                ? [
+                    { label: 'Monthly Goal', value: 'MONTHLY' },
+                    { label: 'Weekly Goal', value: 'WEEKLY' },
+                    { label: 'Give-Up', value: 'GIVE_UP' },
+                  ]
+                : [
+                    { label: 'Quarterly Goal', value: 'QUARTERLY' },
+                    { label: 'Weekly Goal', value: 'WEEKLY' },
+                    { label: 'Give-Up', value: 'GIVE_UP' },
+                  ]
+            }
+            color="arka"
+          />
+
+          <TextInput
+            label="Goal title"
+            placeholder="e.g. Submit 100 job applications"
+            withAsterisk
+            {...form.getInputProps('title')}
+          />
+
+          <Textarea
+            label="Description (optional)"
+            placeholder="Add details, milestones, or context..."
+            autosize
+            minRows={2}
+            {...form.getInputProps('description')}
+          />
+
+          <Radio.Group
+            label="How is this goal measured?"
+            withAsterisk
+            {...form.getInputProps('measureType')}
+          >
+            <Group mt="xs">
+              <Radio
+                value="ACTION_BASED"
+                label="Action-based (numeric target)"
+                color="arka"
+              />
+              <Radio
+                value="PASS_FAIL"
+                label="Pass/fail (yes or no)"
+                color="arka"
+              />
+            </Group>
+          </Radio.Group>
+
+          {form.values.measureType === 'ACTION_BASED' && (
+            <NumberInput
+              label="Target number"
+              placeholder="e.g. 100"
+              min={1}
+              withAsterisk
+              {...form.getInputProps('targetValue')}
+            />
+          )}
+
+          <Group justify="space-between" mt="sm">
+            <Button
+              variant="subtle"
+              color="arka"
+              onClick={() => {
+                setStep('choose-period')
+                form.reset()
+              }}
+            >
+              Back
+            </Button>
+            <Button
+              type="submit"
+              color="arka"
+              loading={createGoal.isPending}
+            >
+              Save goal
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </>
   )
 }
-
-export default GoalSetup

@@ -8,13 +8,13 @@ import {
 import type { AuthUser } from './auth/auth'
 import LoginRoute from './routes/LoginRoute'
 import AuthCallbackRoute from './routes/AuthCallbackRoute'
-import HomeRoute from './routes/HomeRoute'
 import AdminInvitesRoute from './routes/AdminInvitesRoute'
+import AppShellLayout from './AppShellLayout'
+import CheckInsTable from './CheckInsTable'
+import WeeklyCheckIn from './WeeklyCheckIn'
+import GoalSetup from './GoalSetup'
+import GoalsTable from './GoalsTable'
 
-/**
- * Router context. `auth.user` is kept in sync with AuthContext (see main.tsx)
- * so `beforeLoad` guards can read the current user before rendering a route.
- */
 export interface RouterContext {
   auth: { user: AuthUser | null }
 }
@@ -38,25 +38,46 @@ const authCallbackRoute = createRoute({
   component: AuthCallbackRoute,
 })
 
-const homeRoute = createRoute({
+const layoutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  id: 'authenticated',
   beforeLoad: ({ context }) => {
     if (!context.auth.user) {
       throw redirect({ to: '/login' })
     }
   },
-  component: HomeRoute,
+  component: AppShellLayout,
+})
+
+const homeRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/',
+  component: CheckInsTable,
+})
+
+const formRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/form',
+  component: WeeklyCheckIn,
+})
+
+const goalSetupRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/goals/new',
+  component: GoalSetup,
+})
+
+const goalsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/goals',
+  component: GoalsTable,
 })
 
 const adminInvitesRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => layoutRoute,
   path: '/admin/invites',
   beforeLoad: ({ context }) => {
-    if (!context.auth.user) {
-      throw redirect({ to: '/login' })
-    }
-    if (context.auth.user.role !== 'ADMIN') {
+    if (context.auth.user!.role !== 'ADMIN') {
       throw redirect({ to: '/' })
     }
   },
@@ -66,8 +87,13 @@ const adminInvitesRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authCallbackRoute,
-  homeRoute,
-  adminInvitesRoute,
+  layoutRoute.addChildren([
+    homeRoute,
+    formRoute,
+    goalSetupRoute,
+    goalsRoute,
+    adminInvitesRoute,
+  ]),
 ])
 
 export const router = createRouter({

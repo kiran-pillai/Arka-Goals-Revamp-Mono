@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
 import {
   Badge,
   Button,
@@ -34,7 +33,6 @@ const statusColor: Record<Invite['status'], string> = {
 
 export default function AdminInvitesRoute() {
   const qc = useQueryClient()
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<Role>('MEMBER')
   const [formError, setFormError] = useState('')
@@ -77,12 +75,7 @@ export default function AdminInvitesRoute() {
 
   return (
     <Container size="sm" py="xl">
-      <Group justify="space-between" mb="lg">
-        <Title order={2}>Invites</Title>
-        <Button variant="subtle" color="arka" onClick={() => navigate({ to: '/' })}>
-          Back
-        </Button>
-      </Group>
+      <Title order={2} mb="lg">Invites</Title>
 
       <form onSubmit={handleSubmit}>
         <Group align="flex-end" gap="sm">
