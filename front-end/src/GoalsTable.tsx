@@ -1,179 +1,126 @@
 import { useState } from 'react'
-import {
-  Badge,
-  Button,
-  Group,
-  Progress,
-  SegmentedControl,
-  Stack,
-  Table,
-  Text,
-  Title,
-} from '@mantine/core'
+import { Table, Modal, Stack, Text, Badge, Group, Button, Paper } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { useGoals } from './lib/goals'
+import { useAuth } from './auth/AuthContext'
 import type { Goal } from './goal'
-import './WeeklyCheckIn.css'
 
 type GoalsTableProps = {
-  onAddGoal: () => void
-  onBack: () => void
+  scope: 'mine' | 'squad'
 }
 
-const typeLabel: Record<string, string> = {
-  WEEKLY: 'Weekly',
-  MONTHLY: 'Monthly',
-  QUARTERLY: 'Quarterly',
-  GIVE_UP: 'Give-Up',
-}
+export default function GoalsTable({ scope }: GoalsTableProps) {
+  const { data: goals, isLoading, error } = useGoals(scope === 'mine')
+  const { user } = useAuth()
+  const [opened, { open, close }] = useDisclosure(false)
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
 
-const statusColor: Record<string, string> = {
-  ACTIVE: 'blue',
-  COMPLETED: 'teal',
-  FAILED: 'red',
-  CANCELLED: 'gray',
-}
+  if (isLoading) return <Text c="dimmed">Loading goals...</Text>
+  if (error) return <Text c="red">Failed to load goals.</Text>
 
-function GoalProgress({ goal }: { goal: Goal }) {
-  if (goal.measureType === 'PASS_FAIL') {
+  if (!goals || goals.length === 0) {
     return (
-      <Badge color={goal.status === 'COMPLETED' ? 'teal' : 'gray'} variant="light">
-        {goal.status === 'COMPLETED' ? 'Done' : 'Pending'}
-      </Badge>
+      <Paper p="xl" withBorder ta="center" mt="md">
+        <Text c="dimmed">No goals yet</Text>
+        <Text fw={500}>Lock in your SMART goals for the quarter.</Text>
+      </Paper>
     )
   }
-  const pct = goal.targetValue
-    ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
-    : 0
+
+  function handleRowClick(goal: Goal) {
+    setSelectedGoal(goal)
+    open()
+  }
+
+  const rows = goals.map((goal) => (
+    <Table.Tr 
+      key={goal.id} 
+      onClick={() => handleRowClick(goal)}
+      style={{ cursor: 'pointer', transition: 'background-color 0.2s' }}
+      className="hover-row"
+    >
+      <Table.Td>{goal.title}</Table.Td>
+      <Table.Td>{goal.type}</Table.Td>
+      <Table.Td>{goal.status}</Table.Td>
+      {scope === 'squad' && <Table.Td>{goal.user.email}</Table.Td>}
+    </Table.Tr>
+  ))
+
   return (
-    <Stack gap={4}>
-      <Text size="xs" c="dimmed">
-        {goal.currentValue} / {goal.targetValue}
-      </Text>
-      <Progress value={pct} color="arka" size="sm" />
-    </Stack>
-  )
-}
+    <>
+      <Table striped highlightOnHover mt="md">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Goal</Table.Th>
+            <Table.Th>Cadence</Table.Th>
+            <Table.Th>Status</Table.Th>
+            {scope === 'squad' && <Table.Th>Owner</Table.Th>}
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
 
-function GoalsTable({ onAddGoal, onBack }: GoalsTableProps) {
-  const [scope, setScope] = useState<'mine' | 'squad'>('mine')
-  const goals = useGoals(scope === 'mine')
+      <Modal 
+        opened={opened} 
+        onClose={close} 
+        title={<Text fw={700} size="xl">{selectedGoal?.title}</Text>} 
+        size="lg" 
+        centered
+      >
+        {selectedGoal && (
+          <Stack gap="sm">
+            <Group mb="sm">
+              <Badge color="arka">{selectedGoal.type}</Badge>
+              <Badge color={selectedGoal.status === 'ACTIVE' ? 'green' : 'gray'}>
+                {selectedGoal.status}
+              </Badge>
+              {scope === 'squad' && (
+                <Text size="sm" c="dimmed">Owner: {selectedGoal.user.email}</Text>
+              )}
+            </Group>
 
-  const rows = goals.data ?? []
+            <Paper withBorder p="sm" bg="gray.0">
+              <Text fw={700} c="dark.4" size="sm" tt="uppercase">Specific</Text>
+              <Text mt={4}>{selectedGoal.smartSpecific}</Text>
+            </Paper>
 
-  return (
-    <main className="squad-screen is-table">
-      <div className="checkins-sticky-header">
-        <Stack gap="sm">
-          <Button
-            variant="subtle"
-            color="arka"
-            onClick={onBack}
-            w="fit-content"
-            px={0}
-          >
-            ← Back
-          </Button>
+            <Paper withBorder p="sm" bg="gray.0">
+              <Text fw={700} c="dark.4" size="sm" tt="uppercase">Measurable</Text>
+              <Text mt={4}>{selectedGoal.smartMeasurable}</Text>
+            </Paper>
 
-          <Group justify="space-between" align="flex-end">
-            <Title order={1} fz={30}>
-              Goals
-            </Title>
-            <Button color="arka" onClick={onAddGoal}>
-              Add a goal
-            </Button>
-          </Group>
+            <Paper withBorder p="sm" bg="gray.0">
+              <Text fw={700} c="dark.4" size="sm" tt="uppercase">Achievable</Text>
+              <Text mt={4}>{selectedGoal.smartAchievable}</Text>
+            </Paper>
 
-          <SegmentedControl
-            value={scope}
-            onChange={(v) => setScope(v as 'mine' | 'squad')}
-            data={[
-              { label: 'My goals', value: 'mine' },
-              { label: 'Whole squad', value: 'squad' },
-            ]}
-            color="arka"
-          />
-        </Stack>
-      </div>
+            <Paper withBorder p="sm" bg="gray.0">
+              <Text fw={700} c="dark.4" size="sm" tt="uppercase">Relevant</Text>
+              <Text mt={4}>{selectedGoal.smartRelevant}</Text>
+            </Paper>
 
-      <div className="squad-card checkins-card" style={{ paddingTop: 0 }}>
-        {goals.isLoading ? (
-          <Stack align="center" py="xl">
-            <Text c="dimmed">Loading…</Text>
+            <Paper withBorder p="sm" bg="gray.0">
+              <Text fw={700} c="dark.4" size="sm" tt="uppercase">Time-bound</Text>
+              <Text mt={4}>{selectedGoal.smartTimeBound}</Text>
+            </Paper>
+
+            {selectedGoal.targetValue && (
+              <Paper withBorder p="sm" bg="gray.0">
+                <Text fw={700} c="dark.4" size="sm" tt="uppercase">Target Value</Text>
+                <Text mt={4}>{selectedGoal.currentValue} / {selectedGoal.targetValue}</Text>
+              </Paper>
+            )}
+
+            {user?.id === selectedGoal.userId && (
+              <Group justify="flex-end" mt="md">
+                <Button variant="light" color="arka" onClick={() => alert('Edit modal integration pending.')}>
+                  Edit Goal
+                </Button>
+              </Group>
+            )}
           </Stack>
-        ) : rows.length === 0 ? (
-          <Stack align="center" gap={4} py="xl">
-            <Text fw={600}>No goals yet</Text>
-            <Text c="dimmed" size="sm">
-              Set a goal and it'll show up here.
-            </Text>
-          </Stack>
-        ) : (
-          <Table.ScrollContainer minWidth={700}>
-            <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Member</Table.Th>
-                  <Table.Th>Type</Table.Th>
-                  <Table.Th>Goal</Table.Th>
-                  <Table.Th>Measure</Table.Th>
-                  <Table.Th>Progress</Table.Th>
-                  <Table.Th>Status</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {rows.map((g) => (
-                  <Table.Tr key={g.id}>
-                    <Table.Td>
-                      <Text size="sm" fw={600}>
-                        {g.user.email}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge color="arka" variant="light" size="sm">
-                        {typeLabel[g.type] ?? g.type}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" fw={500}>
-                        {g.title}
-                      </Text>
-                      {g.description && (
-                        <Text size="xs" c="dimmed" lineClamp={2}>
-                          {g.description}
-                        </Text>
-                      )}
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">
-                        {g.measureType === 'ACTION_BASED'
-                          ? 'Action-based'
-                          : 'Pass/fail'}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td w={160}>
-                      <GoalProgress goal={g} />
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge
-                        color={statusColor[g.status] ?? 'gray'}
-                        variant="light"
-                      >
-                        {g.status}
-                      </Badge>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
         )}
-      </div>
-
-      <footer className="squad-footer">
-        <span>An Arka organization squad</span>
-      </footer>
-    </main>
+      </Modal>
+    </>
   )
 }
-
-export default GoalsTable

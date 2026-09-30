@@ -9,6 +9,8 @@ import { useAuth } from '../auth/AuthContext'
 import '../WeeklyCheckIn.css'
 import '../App.css'
 
+
+
 type View = 'landing' | 'form' | 'table' | 'goals-setup' | 'goals-table'
 
 export default function HomeRoute() {
@@ -65,7 +67,7 @@ export default function HomeRoute() {
             <img src="/images/TheCheethcat.webp" alt="Cheetah Squad" />
           </div>
           <h1 className="squad-name">Cheetah Squad</h1>
-          <p className="squad-tag">Q3 Goals Cup &middot; Lock in.</p>
+          <p className="squad-tag">Q4 Goals Cup &middot; Lock in.</p>
         </div>
 
         {user && (

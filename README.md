@@ -1,194 +1,59 @@
-# Arka Goals — Cheetah Squad
+# Arka: Action First Goal Tracker
 
-A weekly goal-tracking app for squads within the Arka organization. Squad members submit weekly check-ins covering goal completion, results, commitments, wins, and frictions. Admins manage the roster through an invite-only system with passwordless magic-link authentication.
-
-## Tech Stack
-
-| Layer     | Technology                                          |
-| --------- | --------------------------------------------------- |
-| Frontend  | React 19, Vite, Mantine v9, TanStack Router & Query |
-| Backend   | NestJS 11, Prisma 7 (PostgreSQL), Passport JWT      |
-| Database  | PostgreSQL 16                                        |
-| Mail      | Nodemailer (MailHog in dev)                          |
-| Dev tools | Tilt, Docker Compose                                 |
-
-## Prerequisites
-
-- **Node.js** (v20+)
-- **Docker** & **Docker Compose**
-- **Tilt** (optional — orchestrates everything in one command)
-
-### Installing Docker
-
-Docker Desktop includes both `docker` and `docker compose`.
-
-- **macOS**: Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) or install via Homebrew:
-  ```sh
-  brew install --cask docker
-  ```
-- **Windows**: Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/). Requires WSL 2 — the installer will prompt you to enable it if needed.
-- **Linux**: Install Docker Engine and the Compose plugin following the official guide for your distro at [docs.docker.com/engine/install](https://docs.docker.com/engine/install/).
-
-After installing, verify with:
-```sh
-docker --version
-docker compose version
-```
-
-### Installing Tilt
-
-Tilt watches your files, rebuilds, and restarts services automatically.
-
-- **macOS**:
-  ```sh
-  brew install tilt-dev/tap/tilt
-  ```
-- **Windows**:
-  ```sh
-  iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.ps1'))
-  ```
-- **Linux / manual**:
-  ```sh
-  curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
-  ```
-
-After installing, verify with:
-```sh
-tilt version
-```
-
-## Quick Start (with Tilt)
-
-```sh
-tilt up
-```
-
-This starts PostgreSQL and MailHog via Docker Compose, then launches the backend and frontend as local processes. The Tilt UI shows logs and status for each service.
-
-| Service  | URL                        |
-| -------- | -------------------------- |
-| Frontend | http://localhost:5173      |
-| Backend  | http://localhost:3000      |
-| MailHog  | http://localhost:8025      |
-
-## Manual Start (without Tilt)
-
-### 1. Start infrastructure
-
-```sh
-docker compose up -d
-```
-
-This launches PostgreSQL (port 5432) and MailHog (SMTP on 1025, web UI on 8025).
-
-### 2. Set up the backend
-
-```sh
-cd back-end
-npm install
-npm run db:migrate   # runs Prisma migrations + seeds the admin user
-npm run start:dev    # starts NestJS in watch mode on port 3000
-```
-
-### 3. Set up the frontend
-
-```sh
-cd front-end
-npm install
-npm run dev          # starts Vite dev server on port 5173
-```
-
-## Environment Variables
-
-### Backend (`back-end/.env`)
-
-| Variable           | Default                              | Description                          |
-| ------------------ | ------------------------------------ | ------------------------------------ |
-| `PORT`             | `3000`                               | Backend listen port                  |
-| `DATABASE_URL`     | `postgresql://postgres:postgres@localhost:5432/arka` | PostgreSQL connection string |
-| `JWT_SECRET`       | `dev-only-change-me`                 | Secret for signing JWTs              |
-| `APP_BASE_URL`     | `http://localhost:5173`              | Frontend origin (CORS + magic links) |
-| `SEED_ADMIN_EMAIL` | —                                    | Email for the initial admin account  |
-| `SMTP_HOST`        | `localhost`                          | SMTP server host                     |
-| `SMTP_PORT`        | `1025`                               | SMTP server port                     |
-| `MAIL_FROM`        | `Cheetah Squad <noreply@arka.local>` | Sender address for emails            |
-| `NODE_ENV`         | `development`                        | Environment flag                     |
-
-### Frontend (`front-end/.env`)
-
-| Variable       | Default                  | Description        |
-| -------------- | ------------------------ | ------------------ |
-| `VITE_API_URL` | `http://localhost:3000`  | Backend API origin |
-
-## Authentication
-
-The app uses **magic-link authentication** — no passwords.
-
-1. A user enters their email on the login page.
-2. If the email belongs to an invited (or existing) user, the backend sends an email with a one-time sign-in link.
-3. Clicking the link verifies the token and sets an `httpOnly` session cookie (JWT, 7-day expiry).
-4. In development, emails are captured by **MailHog** — open http://localhost:8025 to view them.
-
-### First-time Setup
-
-The `SEED_ADMIN_EMAIL` env var creates the initial admin account during `npm run db:migrate`. That admin can then sign in via magic link and invite other members from the **Manage Invites** page.
+An accountability and goal-tracking application built to help users structure, refine, and track their monthly and quarterly objectives.
 
 ## Features
 
-### Weekly Check-ins
+* **AI SMART Goal Refiner:** Integrates Google's Gemini API (`gemini-3.8-flash`) to parse natural language intentions into structured SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound) directly during intake.
+* **Interactive Squad Dashboard:** View personal and "Whole squad" goals via an interactive table. Click any goal to open a detailed modal overlaying the full SMART criteria breakdown.
+* **Accountability Check-ins:** Relational tracking for weekly check-ins and specific action commitments.
+* **Profile Management:** Custom user profiles allowing members to set personalized display names instead of defaulting to email addresses.
+* **Secure Multi-Tenant Architecture:** Powered by Supabase PostgreSQL with strict Row Level Security (RLS) policies enforcing read/write boundaries between users.
 
-Squad members submit a weekly form with:
+## Tech Stack
 
-- **Goal completion** — did you hit your weekly goal? (yes/no)
-- **Results** — what were the outcomes?
-- **Commitments** — what are you committing to this week?
-- **Wins** — what went well?
-- **Frictions** — what got in your way?
+* **Frontend:** React, Vite, TypeScript
+* **UI Library:** Mantine components (`@mantine/core`), custom CSS
+* **State & Fetching:** TanStack React Query (`@tanstack/react-query`)
+* **Backend & Auth:** Supabase (PostgreSQL, JWT Authentication)
+* **AI Integration:** Google Gemini API (REST)
 
-Past check-ins are viewable in a table from the home screen.
+## Local Setup
 
-### Invite Management (Admin)
+### 1. Install dependencies
 
-Admins can:
-
-- Send email invites to new members (as MEMBER or ADMIN role)
-- View all invites and their status (PENDING / ACCEPTED / REVOKED)
-- Revoke pending invites
-
-Navigate to the invite management page via the **Manage invites** link on the home screen (visible to admins only).
-
-## Project Structure
+```bash
+npm install
 
 ```
-├── back-end/
-│   ├── prisma/              # Schema, migrations, seed script
-│   └── src/
-│       ├── auth/            # Magic-link auth, JWT strategy, guards
-│       ├── checkins/        # Weekly check-in CRUD
-│       ├── invites/         # Invite management
-│       ├── mail/            # Email service (Nodemailer)
-│       ├── prisma/          # Prisma client module
-│       ├── users/           # User lookup service
-│       └── config/          # Typed app configuration
-├── front-end/
-│   └── src/
-│       ├── auth/            # Auth context & helpers
-│       ├── lib/             # API client, React Query hooks
-│       └── routes/          # Route components (Login, Home, Admin)
-├── docker-compose.yml       # PostgreSQL + MailHog
-└── Tiltfile                 # Dev orchestration
+
+### 2. Configure Environment Variables
+
+Create a `.env.local` file in the `front-end` directory:
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GEMINI_API_KEY=your_google_ai_studio_key
+
 ```
 
-## Common Commands
+*Note: The app targets the `gemini-3.8-flash` model for structured JSON generation.*
 
-| Command                          | Description                          |
-| -------------------------------- | ------------------------------------ |
-| `tilt up`                        | Start everything                     |
-| `tilt down`                      | Stop everything                      |
-| `docker compose up -d`           | Start Postgres + MailHog             |
-| `cd back-end && npm run start:dev` | Start backend in watch mode        |
-| `cd front-end && npm run dev`    | Start frontend dev server            |
-| `cd back-end && npm run db:migrate` | Run migrations + seed             |
-| `cd back-end && npm test`        | Run backend unit tests               |
-| `cd front-end && npm run build`  | Production build of the frontend     |
-| `cd front-end && npm run lint`   | Lint frontend with oxlint            |
+### 3. Run development server
+
+```bash
+npm run dev
+
+```
+
+## Database Schema & Security
+
+The Supabase backend utilizes strict Row Level Security (RLS) across four primary tables:
+
+* **`users`:** Stores auth references and `display_name`. Viewable by all authenticated users; updates restricted to the owner.
+* **`goals`:** Stores monthly/quarterly SMART goals. Viewable by the squad; inserts/updates/deletes restricted to the goal owner.
+* **`checkins`:** Tracks recurring status updates linked to a user. Viewable by the squad; writes restricted to the owner.
+* **`commitments`:** Relational table linking specific actionable items to check-ins. Viewable by the squad; writes restricted to the owner.
+
+All tables require an authenticated JWT session to query or mutate records.

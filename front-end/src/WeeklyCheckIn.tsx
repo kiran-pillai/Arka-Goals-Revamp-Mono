@@ -7,9 +7,12 @@ import {
   Stack,
   Text,
   Textarea,
+  TextInput,
   Title,
+  ActionIcon,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { randomId } from '@mantine/hooks'
 import { useCreateCheckIn } from './lib/checkins'
 import './WeeklyCheckIn.css'
 
@@ -21,7 +24,7 @@ type WeeklyCheckInProps = {
 type FormValues = {
   completedGoal: '' | 'yes' | 'no'
   results: string
-  commitments: string
+  commitments: { text: string; key: string }[]
   wins: string
   frictions: string
 }
@@ -34,7 +37,7 @@ function WeeklyCheckIn({ onBack, onViewCheckIns }: WeeklyCheckInProps) {
     initialValues: {
       completedGoal: '',
       results: '',
-      commitments: '',
+      commitments: [{ text: '', key: randomId() }],
       wins: '',
       frictions: '',
     },
@@ -49,13 +52,31 @@ function WeeklyCheckIn({ onBack, onViewCheckIns }: WeeklyCheckInProps) {
       {
         completedGoal: values.completedGoal === 'yes',
         results: values.results,
-        commitments: values.commitments,
+        commitments: values.commitments.map((c) => c.text),
         wins: values.wins,
         frictions: values.frictions,
       },
       { onSuccess: () => setSubmitted(true) },
     )
   }
+
+  const commitmentsList = form.values.commitments.map((item, index) => (
+    <Group key={item.key} mt="xs" align="center" wrap="nowrap">
+      <TextInput
+        placeholder="e.g. Read 30 pages of DDIA"
+        style={{ flex: 1 }}
+        {...form.getInputProps(`commitments.${index}.text`)}
+      />
+      <ActionIcon 
+        color="red" 
+        variant="subtle" 
+        onClick={() => form.removeListItem('commitments', index)}
+        aria-label="Remove commitment"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </ActionIcon>
+    </Group>
+  ))
 
   return (
     <main className="squad-screen">
@@ -121,14 +142,32 @@ function WeeklyCheckIn({ onBack, onViewCheckIns }: WeeklyCheckInProps) {
                   {...form.getInputProps('results')}
                 />
 
-                <Textarea
-                  label="What actions are you committing to THIS WEEK?"
-                  description="To be completed by Monday at Noon."
-                  placeholder="List the actions you're committing to..."
-                  autosize
-                  minRows={3}
-                  {...form.getInputProps('commitments')}
-                />
+                <div>
+                  <Text fw={500} size="sm">
+                    What actions are you committing to THIS WEEK?
+                  </Text>
+                  <Text size="xs" c="dimmed" mb="sm">
+                    To be completed by Monday at Noon.
+                  </Text>
+                  
+                  {commitmentsList}
+                  
+                  <Group mt="md">
+                    <Button
+                      variant="outline"
+                      color="arka"
+                      size="xs"
+                      onClick={() =>
+                        form.insertListItem('commitments', {
+                          text: '',
+                          key: randomId(),
+                        })
+                      }
+                    >
+                      + Add commitment
+                    </Button>
+                  </Group>
+                </div>
 
                 <Textarea
                   label="What went well last week?"
