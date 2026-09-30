@@ -13,7 +13,7 @@ import {
   Title,
   Text,
 } from '@mantine/core'
-import { api, ApiError } from '../lib/api'
+import { supabase } from '../lib/supabase'
 import type { Role } from '../auth/auth'
 
 interface Invite {
@@ -21,7 +21,7 @@ interface Invite {
   email: string
   role: Role
   status: 'PENDING' | 'ACCEPTED' | 'REVOKED'
-  createdAt: string
+  created_at: string
 }
 
 const INVITES_KEY = ['invites'] as const
@@ -41,27 +41,48 @@ export default function AdminInvitesRoute() {
 
   const invites = useQuery({
     queryKey: INVITES_KEY,
-    queryFn: () => api<Invite[]>('/invites'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('invites')
+        .select('*')
+        .order('created_at', { ascending: false })
+        
+      if (error) throw error
+      return data as Invite[]
+    },
   })
 
   const createInvite = useMutation({
-    mutationFn: (body: { email: string; role: Role }) =>
-      api<Invite>('/invites', { method: 'POST', body }),
+    mutationFn: async (body: { email: string; role: Role }) => {
+      const { data, error } = await supabase
+        .from('invites')
+        .insert({ email: body.email, role: body.role, status: 'PENDING' })
+        .select()
+        .single()
+        
+      if (error) throw error
+      return data
+    },
     onSuccess: () => {
       setEmail('')
       setRole('MEMBER')
       setFormError('')
       qc.invalidateQueries({ queryKey: INVITES_KEY })
     },
-    onError: (err) => {
-      setFormError(
-        err instanceof ApiError ? err.message : 'Failed to create invite.',
-      )
+    onError: (err: Error) => {
+      setFormError(err.message || 'Failed to create invite.')
     },
   })
 
   const revokeInvite = useMutation({
-    mutationFn: (id: string) => api(`/invites/${id}`, { method: 'DELETE' }),
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('invites')
+        .update({ status: 'REVOKED' })
+        .eq('id', id)
+        
+      if (error) throw error
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: INVITES_KEY }),
   })
 
