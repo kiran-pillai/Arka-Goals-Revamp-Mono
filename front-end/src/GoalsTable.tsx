@@ -23,7 +23,6 @@ const typeLabel: Record<string, string> = {
   WEEKLY: 'Weekly',
   MONTHLY: 'Monthly',
   QUARTERLY: 'Quarterly',
-  GIVE_UP: 'Give-Up',
 }
 
 const statusColor: Record<string, string> = {
@@ -34,16 +33,16 @@ const statusColor: Record<string, string> = {
 }
 
 function GoalProgress({ goal }: { goal: Goal }) {
-  if (goal.measureType === 'PASS_FAIL') {
+  if (!goal.targetValue) {
     return (
       <Badge color={goal.status === 'COMPLETED' ? 'teal' : 'gray'} variant="light">
         {goal.status === 'COMPLETED' ? 'Done' : 'Pending'}
       </Badge>
     )
   }
-  const pct = goal.targetValue
-    ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
-    : 0
+  
+  const pct = Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
+  
   return (
     <Stack gap={4}>
       <Text size="xs" c="dimmed">
@@ -76,7 +75,7 @@ function GoalsTable({ onAddGoal, onBack }: GoalsTableProps) {
 
           <Group justify="space-between" align="flex-end">
             <Title order={1} fz={30}>
-              Goals
+              SMART Goals
             </Title>
             <Button color="arka" onClick={onAddGoal}>
               Add a goal
@@ -104,7 +103,7 @@ function GoalsTable({ onAddGoal, onBack }: GoalsTableProps) {
           <Stack align="center" gap={4} py="xl">
             <Text fw={600}>No goals yet</Text>
             <Text c="dimmed" size="sm">
-              Set a goal and it'll show up here.
+              Lock in your SMART goals for the quarter.
             </Text>
           </Stack>
         ) : (
@@ -115,7 +114,6 @@ function GoalsTable({ onAddGoal, onBack }: GoalsTableProps) {
                   <Table.Th>Member</Table.Th>
                   <Table.Th>Type</Table.Th>
                   <Table.Th>Goal</Table.Th>
-                  <Table.Th>Measure</Table.Th>
                   <Table.Th>Progress</Table.Th>
                   <Table.Th>Status</Table.Th>
                 </Table.Tr>
@@ -137,17 +135,8 @@ function GoalsTable({ onAddGoal, onBack }: GoalsTableProps) {
                       <Text size="sm" fw={500}>
                         {g.title}
                       </Text>
-                      {g.description && (
-                        <Text size="xs" c="dimmed" lineClamp={2}>
-                          {g.description}
-                        </Text>
-                      )}
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">
-                        {g.measureType === 'ACTION_BASED'
-                          ? 'Action-based'
-                          : 'Pass/fail'}
+                      <Text size="xs" c="dimmed" lineClamp={2} mt={2}>
+                        <strong>S:</strong> {g.smartSpecific}
                       </Text>
                     </Table.Td>
                     <Table.Td w={160}>

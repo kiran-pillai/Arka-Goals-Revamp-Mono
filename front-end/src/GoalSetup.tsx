@@ -5,8 +5,6 @@ import {
   Button,
   Group,
   NumberInput,
-  Radio,
-  SegmentedControl,
   Stack,
   Text,
   Textarea,
@@ -15,7 +13,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useCreateGoal } from './lib/goals'
-import type { GoalType, MeasureType, GoalPeriodChoice } from './goal'
+import type { GoalType } from './goal'
 import './WeeklyCheckIn.css'
 
 type GoalSetupProps = {
@@ -27,56 +25,59 @@ type Step = 'choose-period' | 'enter-goal'
 
 type FormValues = {
   type: GoalType | ''
-  measureType: MeasureType | ''
   title: string
-  description: string
+  smartSpecific: string
+  smartMeasurable: string
+  smartAchievable: string
+  smartRelevant: string
+  smartTimeBound: string
   targetValue: number | ''
 }
 
 function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
   const [step, setStep] = useState<Step>('choose-period')
-  const [periodChoice, setPeriodChoice] = useState<GoalPeriodChoice | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const createGoal = useCreateGoal()
 
   const form = useForm<FormValues>({
     initialValues: {
       type: '',
-      measureType: '',
       title: '',
-      description: '',
+      smartSpecific: '',
+      smartMeasurable: '',
+      smartAchievable: '',
+      smartRelevant: '',
+      smartTimeBound: '',
       targetValue: '',
     },
     validate: {
       type: (v) => (v ? null : 'Choose a goal type.'),
-      measureType: (v) => (v ? null : 'Choose how this goal is measured.'),
       title: (v) => (v.trim() ? null : 'Give your goal a title.'),
-      targetValue: (v, values) =>
-        values.measureType === 'ACTION_BASED' && (!v || v < 1)
-          ? 'Enter a target number (at least 1).'
-          : null,
+      smartSpecific: (v) => (v.trim() ? null : 'Required.'),
+      smartMeasurable: (v) => (v.trim() ? null : 'Required.'),
+      smartAchievable: (v) => (v.trim() ? null : 'Required.'),
+      smartRelevant: (v) => (v.trim() ? null : 'Required.'),
+      smartTimeBound: (v) => (v.trim() ? null : 'Required.'),
     },
   })
 
-  function handlePeriodNext(choice: GoalPeriodChoice) {
-    setPeriodChoice(choice)
+  function handlePeriodNext(choice: GoalType) {
     form.setFieldValue('type', choice)
     setStep('enter-goal')
   }
 
   function handleSubmit(values: FormValues) {
-    if (!values.type || !values.measureType) return
+    if (!values.type) return
     createGoal.mutate(
       {
-        type: values.type as GoalType,
-        measureType: values.measureType as MeasureType,
+        type: values.type,
         title: values.title,
-        description: values.description || undefined,
-        targetValue:
-          values.measureType === 'ACTION_BASED' && values.targetValue
-            ? Number(values.targetValue)
-            : undefined,
-        periodChoice: periodChoice ?? undefined,
+        smartSpecific: values.smartSpecific,
+        smartMeasurable: values.smartMeasurable,
+        smartAchievable: values.smartAchievable,
+        smartRelevant: values.smartRelevant,
+        smartTimeBound: values.smartTimeBound,
+        targetValue: values.targetValue ? Number(values.targetValue) : undefined,
       },
       { onSuccess: () => setSubmitted(true) },
     )
@@ -104,9 +105,9 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
             </svg>
             <Title order={2}>Goal saved</Title>
             <Text c="dimmed">
-              Your {periodChoice?.toLowerCase() ?? ''} goal is locked in. Stay accountable.
+              Your {form.values.type.toLowerCase()} goal is locked in. Stay accountable.
             </Text>
-            <Group mt="sm" gap="sm">
+            <Group mt="sm" gap="sm" justify="center">
               <Button color="arka" onClick={onViewGoals}>
                 View goals
               </Button>
@@ -117,7 +118,6 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
                   setSubmitted(false)
                   form.reset()
                   setStep('choose-period')
-                  setPeriodChoice(null)
                 }}
               >
                 Add another goal
@@ -172,11 +172,10 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
         ) : (
           <>
             <Title order={1} mt="xl" mb={4} fz={34}>
-              New {periodChoice === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal
+              New {form.values.type === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal
             </Title>
             <Text c="dimmed" mb="xl">
-              Goals must be specific and measurable. Stack at your own risk — it's
-              all or nothing.
+              Break it down. SMART goals are Specific, Measurable, Achievable, Relevant, and Time-bound.
             </Text>
 
             <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
@@ -190,73 +189,74 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
 
                 <div>
                   <Badge color="arka" variant="light" size="lg" mb="xs">
-                    {periodChoice}
+                    {form.values.type}
                   </Badge>
                 </div>
 
-                <SegmentedControl
-                  fullWidth
-                  value={form.values.type || undefined}
-                  onChange={(v) => form.setFieldValue('type', v as GoalType)}
-                  data={
-                    periodChoice === 'MONTHLY'
-                      ? [
-                          { label: 'Monthly Goal', value: 'MONTHLY' },
-                          { label: 'Weekly Goal', value: 'WEEKLY' },
-                          { label: 'Give-Up', value: 'GIVE_UP' },
-                        ]
-                      : [
-                          { label: 'Quarterly Goal', value: 'QUARTERLY' },
-                          { label: 'Weekly Goal', value: 'WEEKLY' },
-                          { label: 'Give-Up', value: 'GIVE_UP' },
-                        ]
-                  }
-                  color="arka"
-                />
-
                 <TextInput
-                  label="Goal title"
-                  placeholder="e.g. Submit 100 job applications"
+                  label="Goal Title"
+                  placeholder="e.g. Land a new engineering role"
                   withAsterisk
                   {...form.getInputProps('title')}
                 />
 
                 <Textarea
-                  label="Description (optional)"
-                  placeholder="Add details, milestones, or context..."
+                  label="Specific"
+                  description="What exactly will you accomplish?"
+                  placeholder="I will apply to 50 senior manufacturing roles in Austin..."
                   autosize
                   minRows={2}
-                  {...form.getInputProps('description')}
+                  withAsterisk
+                  {...form.getInputProps('smartSpecific')}
                 />
 
-                <Radio.Group
-                  label="How is this goal measured?"
+                <Textarea
+                  label="Measurable"
+                  description="How will you track progress?"
+                  placeholder="I will log 5 submitted applications per week..."
+                  autosize
+                  minRows={2}
                   withAsterisk
-                  {...form.getInputProps('measureType')}
-                >
-                  <Group mt="xs">
-                    <Radio
-                      value="ACTION_BASED"
-                      label="Action-based (numeric target)"
-                      color="arka"
-                    />
-                    <Radio
-                      value="PASS_FAIL"
-                      label="Pass/fail (yes or no)"
-                      color="arka"
-                    />
-                  </Group>
-                </Radio.Group>
+                  {...form.getInputProps('smartMeasurable')}
+                />
 
-                {form.values.measureType === 'ACTION_BASED' && (
-                  <NumberInput
-                    label="Target number"
-                    placeholder="e.g. 100"
-                    min={1}
-                    withAsterisk
-                    {...form.getInputProps('targetValue')}
-                  />
-                )}
+                <Textarea
+                  label="Achievable"
+                  description="Is this realistic with your current schedule?"
+                  placeholder="Yes, dedicating 1 hour every evening makes 5 per week very doable..."
+                  autosize
+                  minRows={2}
+                  withAsterisk
+                  {...form.getInputProps('smartAchievable')}
+                />
+
+                <Textarea
+                  label="Relevant"
+                  description="Why does this matter to you right now?"
+                  placeholder="I need to increase my income to support my family's new home..."
+                  autosize
+                  minRows={2}
+                  withAsterisk
+                  {...form.getInputProps('smartRelevant')}
+                />
+
+                <Textarea
+                  label="Time-bound"
+                  description="When exactly will this be done?"
+                  placeholder="By the end of Q4 (December 31st)..."
+                  autosize
+                  minRows={2}
+                  withAsterisk
+                  {...form.getInputProps('smartTimeBound')}
+                />
+
+                <NumberInput
+                  label="Target Number (Optional)"
+                  description="If this goal has a specific numeric target (e.g. 50 applications), enter it here to enable the progress bar."
+                  placeholder="e.g. 50"
+                  min={1}
+                  {...form.getInputProps('targetValue')}
+                />
 
                 <Group justify="space-between" mt="sm">
                   <Button
@@ -264,7 +264,6 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
                     color="arka"
                     onClick={() => {
                       setStep('choose-period')
-                      form.reset()
                     }}
                   >
                     Back
@@ -274,7 +273,7 @@ function GoalSetup({ onBack, onViewGoals }: GoalSetupProps) {
                     color="arka"
                     loading={createGoal.isPending}
                   >
-                    Save goal
+                    Save SMART Goal
                   </Button>
                 </Group>
               </Stack>
