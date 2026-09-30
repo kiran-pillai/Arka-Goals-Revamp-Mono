@@ -7,6 +7,8 @@ import '@mantine/core/styles.css'
 import './index.css'
 import { router } from './router'
 import { AuthProvider, useAuth } from './auth/AuthContext'
+import ManageProfile from './ManageProfile'
+
 
 // Amber/bronze "Arka / Cheetah Squad" palette (light -> dark ramp).
 const theme = createTheme({

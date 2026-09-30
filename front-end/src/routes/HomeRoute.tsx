@@ -9,6 +9,8 @@ import { useAuth } from '../auth/AuthContext'
 import '../WeeklyCheckIn.css'
 import '../App.css'
 
+
+
 type View = 'landing' | 'form' | 'table' | 'goals-setup' | 'goals-table'
 
 export default function HomeRoute() {
