@@ -1,6 +1,6 @@
 # Arka Goals
 
-Goal-tracking app: React frontend, NestJS + Prisma backend, PostgreSQL database.
+Goal-tracking app: React FE, NestJS + Prisma BE, PostgreSQL database.
 
 ## Railway
 
