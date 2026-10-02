@@ -62,7 +62,7 @@ export default function AppShellLayout() {
   const navigate = useNavigate()
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
-  const colorScheme = useComputedColorScheme('light')
+  const colorScheme = useComputedColorScheme('dark')
   const t = colorScheme === 'dark' ? dark : light
 
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -76,8 +76,7 @@ export default function AppShellLayout() {
   )
 
   function isActive(path: string) {
-    if (path === '/') return currentPath === '/'
-    return currentPath.startsWith(path)
+    return currentPath === path
   }
 
   async function handleSignOut() {
