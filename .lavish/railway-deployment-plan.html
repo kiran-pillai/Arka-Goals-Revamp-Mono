@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arka Goals — Railway Deployment Plan</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-hover: #222632;
+    --border: #2a2e3b;
+    --text: #e4e6ed;
+    --text-muted: #8b8fa3;
+    --accent: #7c5cfc;
+    --accent-dim: rgba(124, 92, 252, 0.12);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251, 191, 36, 0.12);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96, 165, 250, 0.12);
+    --radius: 10px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-accent { background: var(--accent-dim); color: var(--accent); }
+
+  /* Architecture Diagram */
+  .arch-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .arch-section h2 {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .arch-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    min-width: 160px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .arch-box:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-dim);
+  }
+  .arch-box .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .arch-box .label { font-weight: 600; font-size: 0.9rem; }
+  .arch-box .detail { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem; }
+
+  .arch-arrow {
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .railway-badge {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--accent);
+    color: white;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Steps */
+  .steps {
+    margin-bottom: 2.5rem;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: var(--accent); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    flex: 1;
+  }
+
+  .step-effort {
+    flex-shrink: 0;
+  }
+
+  .step-chevron {
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .step.open .step-chevron { transform: rotate(180deg); }
+
+  .step-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem 3.75rem;
+  }
+  .step.open .step-body { display: block; }
+
+  .step-body p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    color: var(--text-muted);
+  }
+  .code-block .keyword { color: var(--accent); }
+  .code-block .string { color: var(--green); }
+  .code-block .comment { color: #555; font-style: italic; }
+  .code-block .prop { color: var(--blue); }
+
+  /* File Changes Table */
+  .file-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+  }
+  .file-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .file-table td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .file-table td:first-child {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--blue);
+  }
+
+  /* Env Vars */
+  .env-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+  }
+  @media (max-width: 600px) { .env-grid { grid-template-columns: 1fr; } }
+
+  .env-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+  .env-card .name {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-bottom: 0.25rem;
+  }
+  .env-card .desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .env-card .source {
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+
+  /* Checklist */
+  .checklist {
+    list-style: none;
+    margin: 0.75rem 0;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .checklist li::before {
+    content: '○';
+    color: var(--accent);
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Cost */
+  .cost-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .cost-row .label { font-size: 0.9rem; }
+  .cost-row .price { font-weight: 700; color: var(--green); font-size: 1rem; }
+
+  /* Summary bar */
+  .summary-bar {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+  .summary-stat {
+    text-align: center;
+  }
+  .summary-stat .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .summary-stat .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    margin-top: 2.5rem;
+    font-weight: 600;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Arka Goals — Railway Deployment</h1>
+  <p>Production deployment plan for the goal-tracking app</p>
+</header>
+
+<div class="summary-bar">
+  <div class="summary-stat">
+    <div class="value">3</div>
+    <div class="label">Services</div>
+  </div>
+  <div class="summary-stat">
+    <div class="value">5</div>
+    <div class="label">Files Changed</div>
+  </div>
+  <div class="summary-stat">
+    <div class="value">~$5</div>
+    <div class="label">Monthly Cost</div>
+  </div>
+  <div class="summary-stat">
+    <div class="value">~30min</div>
+    <div class="label">Setup Time</div>
+  </div>
+</div>
+
+<!-- Architecture -->
+<div class="arch-section">
+  <h2>Production Architecture</h2>
+  <div class="arch-diagram">
+    <div class="railway-badge">Railway Project</div>
+    <div class="arch-box">
+      <div class="icon">🌐</div>
+      <div class="label">Frontend</div>
+      <div class="detail">Nginx + React SPA</div>
+      <div class="detail" style="margin-top:4px"><span class="badge badge-blue">Port 80</span></div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box">
+      <div class="icon">⚡</div>
+      <div class="label">API</div>
+      <div class="detail">NestJS + Prisma</div>
+      <div class="detail" style="margin-top:4px"><span class="badge badge-accent">Port 3000</span></div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box">
+      <div class="icon">🗄️</div>
+      <div class="label">PostgreSQL 16</div>
+      <div class="detail">Managed by Railway</div>
+      <div class="detail" style="margin-top:4px"><span class="badge badge-green">Auto-provisioned</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Steps -->
+<h2 class="section-title">Implementation Steps</h2>
+<div class="steps">
+
+  <div class="step open" onclick="this.classList.toggle('open')">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div class="step-title">Create production Docker Compose</div>
+      <div class="step-effort"><span class="badge badge-green">New file</span></div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <p>Add <code>docker-compose.prod.yml</code> at the repo root to wire all three services together for both local testing and Railway.</p>
+      <div class="code-block">
+<span class="comment"># docker-compose.prod.yml</span>
+<span class="keyword">services</span>:
+  <span class="prop">db</span>:
+    <span class="prop">image</span>: <span class="string">postgres:16-alpine</span>
+    <span class="prop">environment</span>:
+      <span class="prop">POSTGRES_DB</span>: <span class="string">arka</span>
+      ...
+    <span class="prop">volumes</span>:
+      - <span class="string">pgdata:/var/lib/postgresql/data</span>
+
+  <span class="prop">api</span>:
+    <span class="prop">build</span>: <span class="string">./back-end</span>
+    <span class="prop">depends_on</span>: [<span class="string">db</span>]
+    <span class="prop">environment</span>:
+      <span class="prop">DATABASE_URL</span>: <span class="string">postgresql://...</span>
+      ...
+    <span class="prop">ports</span>: [<span class="string">"3000:3000"</span>]
+
+  <span class="prop">frontend</span>:
+    <span class="prop">build</span>: <span class="string">./front-end</span>
+    <span class="prop">depends_on</span>: [<span class="string">api</span>]
+    <span class="prop">environment</span>:
+      <span class="prop">API_UPSTREAM</span>: <span class="string">http://api:3000</span>
+    <span class="prop">ports</span>: [<span class="string">"80:80"</span>]
+      </div>
+    </div>
+  </div>
+
+  <div class="step" onclick="this.classList.toggle('open')">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div class="step-title">Make nginx upstream configurable</div>
+      <div class="step-effort"><span class="badge badge-amber">Modify</span></div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <p>The current <code>nginx.conf</code> hardcodes <code>http://api:3000/</code>. We'll template it so Railway's internal service URL is injected at container start.</p>
+      <table class="file-table">
+        <tr><th>File</th><th>Change</th></tr>
+        <tr>
+          <td>front-end/nginx.conf</td>
+          <td>Replace <code>http://api:3000</code> with <code>${API_UPSTREAM}</code> placeholder</td>
+        </tr>
+        <tr>
+          <td>front-end/Dockerfile</td>
+          <td>Add <code>envsubst</code> entrypoint to resolve the template at startup</td>
+        </tr>
+      </table>
+      <div class="code-block">
+<span class="comment"># nginx.conf.template (the key change)</span>
+<span class="keyword">location</span> /api/ {
+    <span class="prop">proxy_pass</span> <span class="string">${API_UPSTREAM}/</span>;
+    ...
+}
+
+<span class="comment"># Dockerfile addition</span>
+<span class="keyword">CMD</span> [<span class="string">"sh"</span>, <span class="string">"-c"</span>,
+  <span class="string">"envsubst '${API_UPSTREAM}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"</span>]
+      </div>
+    </div>
+  </div>
+
+  <div class="step" onclick="this.classList.toggle('open')">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div class="step-title">Document environment variables</div>
+      <div class="step-effort"><span class="badge badge-green">New file</span></div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <p>Create <code>.env.example</code> in the back-end so production env vars are documented.</p>
+      <div class="env-grid">
+        <div class="env-card">
+          <div class="name">DATABASE_URL</div>
+          <div class="desc">PostgreSQL connection string</div>
+          <div class="source">Auto-injected by Railway</div>
+        </div>
+        <div class="env-card">
+          <div class="name">JWT_SECRET</div>
+          <div class="desc">Secret for signing auth tokens</div>
+          <div class="source">Generate with: openssl rand -base64 32</div>
+        </div>
+        <div class="env-card">
+          <div class="name">APP_BASE_URL</div>
+          <div class="desc">Public URL of the frontend</div>
+          <div class="source">Your Railway public domain</div>
+        </div>
+        <div class="env-card">
+          <div class="name">NODE_ENV</div>
+          <div class="desc">Set to "production"</div>
+          <div class="source">Set in Railway service vars</div>
+        </div>
+        <div class="env-card">
+          <div class="name">SMTP_HOST</div>
+          <div class="desc">Mail provider SMTP host</div>
+          <div class="source">e.g. smtp.resend.com</div>
+        </div>
+        <div class="env-card">
+          <div class="name">SMTP_PORT</div>
+          <div class="desc">Mail provider SMTP port</div>
+          <div class="source">Usually 587 for TLS</div>
+        </div>
+        <div class="env-card">
+          <div class="name">MAIL_FROM</div>
+          <div class="desc">Sender address for emails</div>
+          <div class="source">e.g. noreply@yourdomain.com</div>
+        </div>
+        <div class="env-card">
+          <div class="name">API_UPSTREAM</div>
+          <div class="desc">Internal URL for nginx proxy</div>
+          <div class="source">Railway internal networking URL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" onclick="this.classList.toggle('open')">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div class="step-title">Deploy to Railway</div>
+      <div class="step-effort"><span class="badge badge-accent">Manual</span></div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <p>One-time setup on Railway's dashboard or CLI.</p>
+      <ul class="checklist">
+        <li>Push repo to GitHub (if not already)</li>
+        <li>Create a new Railway project</li>
+        <li>Add PostgreSQL plugin (one click — DATABASE_URL auto-injected)</li>
+        <li>Add "api" service → point to <code>back-end/</code> directory</li>
+        <li>Add "frontend" service → point to <code>front-end/</code> directory</li>
+        <li>Set environment variables on each service</li>
+        <li>Configure custom domain (optional)</li>
+        <li>Deploy — Railway builds Dockerfiles and starts services</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step" onclick="this.classList.toggle('open')">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <div class="step-title">Verify deployment</div>
+      <div class="step-effort"><span class="badge badge-blue">Test</span></div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <p>End-to-end verification checklist.</p>
+      <ul class="checklist">
+        <li>Test locally: <code>docker compose -f docker-compose.prod.yml up --build</code></li>
+        <li>Frontend loads at the public URL</li>
+        <li>API proxying works: <code>/api/</code> routes reach NestJS</li>
+        <li>Database migrations ran (check Railway deploy logs)</li>
+        <li>Magic-link login flow sends email via real SMTP</li>
+        <li>Create a goal and verify it persists</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- SMTP Setup -->
+<h2 class="section-title">SMTP Setup Guide</h2>
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem;">
+  <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+    <span style="font-size: 1.5rem;">📧</span>
+    <div>
+      <div style="font-weight: 700; font-size: 1rem;">Resend <span class="badge badge-green">Recommended</span></div>
+      <div style="color: var(--text-muted); font-size: 0.85rem;">Free tier: 3,000 emails/month, 100/day — plenty for magic-link auth</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <div style="font-weight: 600; font-size: 0.85rem; color: var(--accent); margin-bottom: 0.5rem;">Setup Steps</div>
+    <ul class="checklist">
+      <li>Sign up at <strong>resend.com</strong> (GitHub OAuth, takes 30 seconds)</li>
+      <li>Go to <strong>Settings → API Keys</strong> → create a key (save it — shown once)</li>
+      <li>Go to <strong>Domains</strong> → add your domain (e.g. <code>arka.yourdomain.com</code>)</li>
+      <li>Add the DNS records Resend gives you (SPF, DKIM, DMARC) — 3 TXT + 1 MX record</li>
+      <li>Wait for verification (usually 1–5 minutes)</li>
+      <li>While waiting, you can test with <code>onboarding@resend.dev</code> as the sender</li>
+    </ul>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <div style="font-weight: 600; font-size: 0.85rem; color: var(--accent); margin-bottom: 0.5rem;">Railway Environment Variables</div>
+    <div class="code-block">
+<span class="prop">SMTP_HOST</span>=<span class="string">smtp.resend.com</span>
+<span class="prop">SMTP_PORT</span>=<span class="string">587</span>
+<span class="prop">MAIL_FROM</span>=<span class="string">Cheetah Squad &lt;noreply@yourdomain.com&gt;</span>
+    </div>
+  </div>
+
+  <div style="background: var(--amber-dim); border: 1px solid rgba(251,191,36,0.25); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+    <div style="font-weight: 600; font-size: 0.85rem; color: var(--amber); margin-bottom: 0.25rem;">⚠️ Code Change Required</div>
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      The current <code>mail.service.ts</code> uses <code>secure: false</code> and no auth — fine for MailHog in dev, but production needs SMTP auth. You'll need to add:
+    </div>
+    <div class="code-block" style="margin-top: 0.5rem;">
+<span class="comment">// mail.service.ts — production transport config</span>
+<span class="keyword">this</span>.transporter = nodemailer.createTransport({
+  <span class="prop">host</span>: app.smtpHost,
+  <span class="prop">port</span>: app.smtpPort,
+  <span class="prop">secure</span>: app.smtpPort === <span class="string">465</span>,
+  <span class="prop">auth</span>: app.isProd ? {
+    <span class="prop">user</span>: <span class="string">'resend'</span>,
+    <span class="prop">pass</span>: app.smtpApiKey,  <span class="comment">// SMTP_API_KEY env var (your Resend API key)</span>
+  } : <span class="keyword">undefined</span>,
+});
+    </div>
+  </div>
+
+  <div>
+    <div style="font-weight: 600; font-size: 0.85rem; color: var(--accent); margin-bottom: 0.5rem;">New Env Var Needed</div>
+    <div class="env-grid" style="grid-template-columns: 1fr;">
+      <div class="env-card">
+        <div class="name">SMTP_API_KEY</div>
+        <div class="desc">Your Resend API key — used as the SMTP password. Resend uses <code>resend</code> as the username.</div>
+        <div class="source">Get from: resend.com → Settings → API Keys</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 2rem;">
+  <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.75rem;">Alternatives</div>
+  <table class="file-table">
+    <tr><th>Provider</th><th>Free Tier</th><th>Notes</th></tr>
+    <tr>
+      <td style="color: var(--text); font-family: var(--font);">Resend</td>
+      <td>3,000/mo</td>
+      <td>Simplest setup, great DX, built for transactional email</td>
+    </tr>
+    <tr>
+      <td style="color: var(--text); font-family: var(--font);">Postmark</td>
+      <td>100/mo</td>
+      <td>Excellent deliverability, more enterprise-oriented</td>
+    </tr>
+    <tr>
+      <td style="color: var(--text); font-family: var(--font);">AWS SES</td>
+      <td>62,000/mo*</td>
+      <td>Cheapest at scale, more setup required (IAM, sandbox approval)</td>
+    </tr>
+    <tr>
+      <td style="color: var(--text); font-family: var(--font);">Brevo (Sendinblue)</td>
+      <td>300/day</td>
+      <td>Good free tier, but slower onboarding</td>
+    </tr>
+  </table>
+  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">* SES free tier is when sending from an EC2 instance or Lambda</div>
+</div>
+
+<!-- Cost -->
+<h2 class="section-title">Estimated Monthly Cost</h2>
+<div class="cost-row">
+  <div class="label">Railway Hobby Plan</div>
+  <div class="price">$5/mo</div>
+</div>
+<div class="cost-row">
+  <div class="label">Includes: 8 GB RAM, 8 vCPU, 100 GB disk</div>
+  <div class="price" style="color: var(--text-muted); font-weight: 400; font-size: 0.85rem;">+ usage if exceeded</div>
+</div>
+<div class="cost-row">
+  <div class="label">Email (Resend free tier)</div>
+  <div class="price">$0</div>
+</div>
+<div class="cost-row" style="border: 1px solid var(--accent);">
+  <div class="label" style="font-weight: 700;">Total</div>
+  <div class="price">~$5/mo</div>
+</div>
+
+<footer>
+  Arka Goals Deployment Plan &middot; Generated 2026-10-01 &middot; Annotate any section to provide feedback
+</footer>
+
+<script>
+  // Close all steps except the first by default
+  document.querySelectorAll('.step').forEach((s, i) => {
+    if (i > 0) s.classList.remove('open');
+  });
+</script>
+</body>
+</html>

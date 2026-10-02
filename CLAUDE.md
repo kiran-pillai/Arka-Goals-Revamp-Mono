@@ -4,6 +4,8 @@ Goal-tracking app: React frontend, NestJS + Prisma backend, PostgreSQL database.
 
 ## Railway
 
+Production URL: https://arka-goals-revamp-mono-production.up.railway.app
+
 Always use the **cheerful-delight** project when inspecting infrastructure via the Railway CLI.
 
 **Read-only access only.** The following are allowed:
