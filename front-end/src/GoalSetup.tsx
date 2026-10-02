@@ -163,10 +163,14 @@ export default function GoalSetup() {
     )
   }
 
+  const isGiveUp = form.values.type === 'GIVE_UP'
+
   return (
     <>
       <Title order={1} mb={4} fz={34}>
-        New {periodChoice === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal
+        {isGiveUp
+          ? 'New Give-Up'
+          : `New ${periodChoice === 'QUARTERLY' ? 'Quarterly' : 'Monthly'} Goal`}
       </Title>
       <Text c="dimmed" mb="xl">
         Goals must be specific and measurable. Stack at your own risk — it's
@@ -207,34 +211,54 @@ export default function GoalSetup() {
           />
 
           <TextInput
-            label="Goal title"
-            placeholder="e.g. Submit 100 job applications"
+            label={isGiveUp ? 'Give up title' : 'Goal title'}
+            placeholder={
+              isGiveUp
+                ? 'e.g. Stop doomscrolling before bed'
+                : 'e.g. Submit 100 job applications'
+            }
             withAsterisk
             {...form.getInputProps('title')}
           />
 
           <Textarea
-            label="Description (optional)"
-            placeholder="Add details, milestones, or context..."
+            label={
+              isGiveUp
+                ? 'Why are you giving this up? (optional)'
+                : 'Description (optional)'
+            }
+            placeholder={
+              isGiveUp
+                ? "What's the trigger, and what will you do instead?"
+                : 'Add details, milestones, or context...'
+            }
             autosize
             minRows={2}
             {...form.getInputProps('description')}
           />
 
           <Radio.Group
-            label="How is this goal measured?"
+            label={isGiveUp ? 'How will you track this?' : 'How is this goal measured?'}
             withAsterisk
             {...form.getInputProps('measureType')}
           >
             <Group mt="xs">
               <Radio
                 value="ACTION_BASED"
-                label="Action-based (numeric target)"
+                label={
+                  isGiveUp
+                    ? 'Streak-based (days without)'
+                    : 'Action-based (numeric target)'
+                }
                 color="arka"
               />
               <Radio
                 value="PASS_FAIL"
-                label="Pass/fail (yes or no)"
+                label={
+                  isGiveUp
+                    ? 'Pass/fail (did you stay clean?)'
+                    : 'Pass/fail (yes or no)'
+                }
                 color="arka"
               />
             </Group>
@@ -242,8 +266,8 @@ export default function GoalSetup() {
 
           {form.values.measureType === 'ACTION_BASED' && (
             <NumberInput
-              label="Target number"
-              placeholder="e.g. 100"
+              label={isGiveUp ? 'Target streak (days)' : 'Target number'}
+              placeholder={isGiveUp ? 'e.g. 30' : 'e.g. 100'}
               min={1}
               withAsterisk
               {...form.getInputProps('targetValue')}
@@ -266,7 +290,7 @@ export default function GoalSetup() {
               color="arka"
               loading={createGoal.isPending}
             >
-              Save goal
+              {isGiveUp ? 'Commit to giving up' : 'Save goal'}
             </Button>
           </Group>
         </Stack>
