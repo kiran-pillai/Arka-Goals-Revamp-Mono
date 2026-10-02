@@ -67,6 +67,7 @@ export default function AppShellLayout() {
   const currentPath = routerState.location.pathname
   const colorScheme = useComputedColorScheme('dark')
   const t = colorScheme === 'dark' ? dark : light
+  const goalSetupLocked = useIsGoalSetupLocked()
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
@@ -76,6 +77,10 @@ export default function AppShellLayout() {
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.adminOnly || user?.role === 'ADMIN',
+  ).map((item) =>
+    item.path === '/goals/new' && goalSetupLocked
+      ? { ...item, disabled: true, disabledTooltip: 'Goals are set for this period' }
+      : item,
   )
 
   function isActive(path: string) {
@@ -173,11 +178,13 @@ export default function AppShellLayout() {
           {visibleItems.map((item) => {
             const active = isActive(item.path)
             const Icon = item.icon
+            const disabled = !!item.disabled
 
             const button = (
               <UnstyledButton
                 key={item.path}
                 onClick={() => {
+                  if (disabled) return
                   navigate({ to: item.path })
                   if (isMobile) toggleMobile()
                 }}
@@ -199,15 +206,19 @@ export default function AppShellLayout() {
                   fontSize: 14,
                   borderRadius: 0,
                   transition: 'background-color 150ms ease',
+                  ...(disabled && {
+                    opacity: 0.5,
+                    cursor: 'not-allowed',
+                  }),
                 }}
                 onMouseEnter={(e) => {
-                  if (!active) {
+                  if (!active && !disabled) {
                     ;(e.currentTarget as HTMLElement).style.backgroundColor =
                       t.hoverItemBg
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!active) {
+                  if (!active && !disabled) {
                     ;(e.currentTarget as HTMLElement).style.backgroundColor =
                       'transparent'
                   }
@@ -217,6 +228,19 @@ export default function AppShellLayout() {
                 {!navbarCollapsed && <span>{item.label}</span>}
               </UnstyledButton>
             )
+
+            if (disabled && item.disabledTooltip) {
+              return (
+                <Tooltip
+                  key={item.path}
+                  label={item.disabledTooltip}
+                  position="right"
+                  withArrow
+                >
+                  {button}
+                </Tooltip>
+              )
+            }
 
             if (navbarCollapsed) {
               return (

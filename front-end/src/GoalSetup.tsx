@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useNavigate } from '@tanstack/react-router'
-import { useCreateGoal } from './lib/goals'
+import { useCreateGoal, useIsGoalSetupLocked } from './lib/goals'
 import type { GoalType, MeasureType, GoalPeriodChoice } from './goal'
 
 type Step = 'choose-period' | 'enter-goal'
@@ -34,6 +34,7 @@ export default function GoalSetup() {
   const [submitted, setSubmitted] = useState(false)
   const createGoal = useCreateGoal()
   const navigate = useNavigate()
+  const locked = useIsGoalSetupLocked()
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -75,6 +76,20 @@ export default function GoalSetup() {
         periodChoice: periodChoice ?? undefined,
       },
       { onSuccess: () => setSubmitted(true) },
+    )
+  }
+
+  if (locked) {
+    return (
+      <Stack align="center" gap="sm" py="xl">
+        <Title order={2}>Goals already set for this period</Title>
+        <Text c="dimmed">
+          You have already saved your goals and give-up for the current period.
+        </Text>
+        <Button color="arka" mt="sm" onClick={() => navigate({ to: '/goals' })}>
+          View Goals
+        </Button>
+      </Stack>
     )
   }
 
