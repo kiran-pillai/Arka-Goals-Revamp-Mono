@@ -1,26 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
-import type { Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 import type { AppConfig } from '../config/configuration';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private readonly transporter: Transporter;
+  private readonly resend: Resend;
   private readonly from: string;
 
   constructor(config: ConfigService) {
     const app = config.getOrThrow<AppConfig>('app');
     this.from = app.mailFrom;
-    this.transporter = nodemailer.createTransport({
-      host: app.smtpHost,
-      port: app.smtpPort,
-      secure: !!app.smtpApiKey,
-      ...(app.smtpApiKey
-        ? { auth: { user: 'resend', pass: app.smtpApiKey } }
-        : {}),
-    });
+    this.resend = new Resend(app.smtpApiKey);
   }
 
   async sendLoginLink(email: string, url: string): Promise<void> {
@@ -43,7 +35,16 @@ export class MailService {
   }
 
   private async send(to: string, subject: string, html: string): Promise<void> {
-    await this.transporter.sendMail({ from: this.from, to, subject, html });
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to,
+      subject,
+      html,
+    });
+    if (error) {
+      this.logger.error(`Failed to send "${subject}" to ${to}: ${error.message}`);
+      throw new Error(`Email delivery failed: ${error.message}`);
+    }
     this.logger.log(`Sent "${subject}" to ${to}`);
   }
 }
