@@ -13,11 +13,13 @@ export class MailService {
   constructor(config: ConfigService) {
     const app = config.getOrThrow<AppConfig>('app');
     this.from = app.mailFrom;
-    // Mailhog in dev: no auth, no TLS.
     this.transporter = nodemailer.createTransport({
       host: app.smtpHost,
       port: app.smtpPort,
-      secure: false,
+      secure: !!app.smtpApiKey,
+      ...(app.smtpApiKey
+        ? { auth: { user: 'resend', pass: app.smtpApiKey } }
+        : {}),
     });
   }
 
