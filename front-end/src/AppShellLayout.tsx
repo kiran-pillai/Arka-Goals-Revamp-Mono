@@ -21,6 +21,7 @@ import {
   IconChevronsRight,
 } from '@tabler/icons-react'
 import { useAuth } from './auth/AuthContext'
+import { useIsGoalSetupLocked } from './lib/goals'
 
 const light = {
   amber: '#e6a532',
@@ -47,6 +48,8 @@ interface NavItem {
   icon: typeof IconHome
   path: string
   adminOnly?: boolean
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
 const NAV_ITEMS: NavItem[] = [
