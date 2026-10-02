@@ -91,9 +91,13 @@ export default function GoalSetup() {
             strokeLinejoin="round"
           />
         </svg>
-        <Title order={2}>Goal saved</Title>
+        <Title order={2}>
+          {form.values.type === 'GIVE_UP' ? 'Give-up locked in' : 'Goal saved'}
+        </Title>
         <Text c="dimmed">
-          Your {periodChoice?.toLowerCase() ?? ''} goal is locked in. Stay accountable.
+          {form.values.type === 'GIVE_UP'
+            ? "You've committed to letting go. Stay accountable."
+            : `Your ${periodChoice?.toLowerCase() ?? ''} goal is locked in. Stay accountable.`}
         </Text>
         <Group mt="sm" gap="sm">
           <Button color="arka" onClick={() => navigate({ to: '/goals' })}>
@@ -192,12 +196,10 @@ export default function GoalSetup() {
               periodChoice === 'MONTHLY'
                 ? [
                     { label: 'Monthly Goal', value: 'MONTHLY' },
-                    { label: 'Weekly Goal', value: 'WEEKLY' },
                     { label: 'Give-Up', value: 'GIVE_UP' },
                   ]
                 : [
                     { label: 'Quarterly Goal', value: 'QUARTERLY' },
-                    { label: 'Weekly Goal', value: 'WEEKLY' },
                     { label: 'Give-Up', value: 'GIVE_UP' },
                   ]
             }
