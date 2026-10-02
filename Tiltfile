@@ -26,6 +26,7 @@ local_resource(
     deps=['./back-end/src'],
     resource_deps=['db-migrate', 'mailhog'],
     labels=['app'],
+    links=['http://localhost:3000'],
 )
 
 # --- Frontend (Vite, standalone) ---
@@ -36,4 +37,5 @@ local_resource(
     deps=['./front-end/src'],
     resource_deps=['back-end'],
     labels=['app'],
+    links=['http://localhost:5173'],
 )
