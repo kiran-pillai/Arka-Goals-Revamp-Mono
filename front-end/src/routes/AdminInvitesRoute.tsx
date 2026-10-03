@@ -34,6 +34,8 @@ const statusColor: Record<Invite['status'], string> = {
 export default function AdminInvitesRoute() {
   const qc = useQueryClient()
   const [email, setEmail] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [role, setRole] = useState<Role>('MEMBER')
   const [formError, setFormError] = useState('')
 
@@ -43,10 +45,12 @@ export default function AdminInvitesRoute() {
   })
 
   const createInvite = useMutation({
-    mutationFn: (body: { email: string; role: Role }) =>
+    mutationFn: (body: { email: string; role: Role; firstName?: string; lastName?: string }) =>
       api<Invite>('/invites', { method: 'POST', body }),
     onSuccess: () => {
       setEmail('')
+      setFirstName('')
+      setLastName('')
       setRole('MEMBER')
       setFormError('')
       qc.invalidateQueries({ queryKey: INVITES_KEY })
@@ -70,7 +74,7 @@ export default function AdminInvitesRoute() {
       setFormError('Please enter a valid email address.')
       return
     }
-    createInvite.mutate({ email: trimmed, role })
+    createInvite.mutate({ email: trimmed, role, firstName: firstName.trim() || undefined, lastName: lastName.trim() || undefined })
   }
 
   return (
@@ -87,8 +91,23 @@ export default function AdminInvitesRoute() {
               setEmail(e.currentTarget.value)
               if (formError) setFormError('')
             }}
-            style={{ flex: 1 }}
+            
+            w={180}
             error={formError || undefined}
+          />
+          <TextInput
+            label="First name"
+            placeholder="Optional"
+            value={firstName}
+            onChange={(e) => setFirstName(e.currentTarget.value)}
+            w={140}
+          />
+          <TextInput
+            label="Last name"
+            placeholder="Optional"
+            value={lastName}
+            onChange={(e) => setLastName(e.currentTarget.value)}
+            w={140}
           />
           <Select
             label="Role"

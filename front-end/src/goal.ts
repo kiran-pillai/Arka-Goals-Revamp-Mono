@@ -1,6 +1,6 @@
-export type GoalType = 'MONTHLY' | 'QUARTERLY' | 'GIVE_UP'
+export type GoalType = 'QUARTERLY'
 export type MeasureType = 'ACTION_BASED' | 'PASS_FAIL'
-export type GoalPeriodChoice = 'MONTHLY' | 'QUARTERLY'
+export type GoalPeriodChoice = 'QUARTERLY'
 export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
 
 export type GoalInput = {

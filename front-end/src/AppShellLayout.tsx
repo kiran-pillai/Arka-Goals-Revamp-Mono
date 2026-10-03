@@ -1,5 +1,6 @@
 import {
   AppShell,
+  Avatar,
   Burger,
   Button,
   Group,
@@ -157,14 +158,20 @@ export default function AppShellLayout() {
 
           <Group gap="sm">
             {user && (
-              <Text size="sm" c="dimmed" visibleFrom="sm">
-                {user.email}
-              </Text>
+              user.firstName && user.lastName ? (
+                <Avatar color="arka" radius="xl" size="md">
+                  {user.firstName[0]}{user.lastName[0]}
+                </Avatar>
+              ) : (
+                <Text size="sm" c="dimmed" visibleFrom="sm">
+                  {user.email}
+                </Text>
+              )
             )}
             <Button
               variant="subtle"
               color="gray"
-              size="compact-sm"
+              size="compact-md"
               onClick={handleSignOut}
             >
               Sign Out

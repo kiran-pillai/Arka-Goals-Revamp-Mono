@@ -15,9 +15,7 @@ import { useGoals } from './lib/goals'
 import type { Goal } from './goal'
 
 const typeLabel: Record<string, string> = {
-  MONTHLY: 'Monthly',
   QUARTERLY: 'Quarterly',
-  GIVE_UP: 'Give-Up',
 }
 
 const statusColor: Record<string, string> = {

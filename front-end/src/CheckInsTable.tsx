@@ -176,7 +176,9 @@ export default function CheckInsTable() {
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" fw={600}>
-                          {c.user.email}
+                          {c.user.firstName && c.user.lastName
+                            ? `${c.user.firstName} ${c.user.lastName}`
+                            : c.user.email}
                         </Text>
                       </Table.Td>
                       <Table.Td ta="center">

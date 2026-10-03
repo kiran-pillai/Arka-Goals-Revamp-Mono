@@ -13,5 +13,5 @@ export type CheckInInput = {
 export type CheckIn = CheckInInput & {
   id: string
   createdAt: string
-  user: { email: string }
+  user: { email: string; firstName?: string; lastName?: string }
 }
