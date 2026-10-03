@@ -42,7 +42,7 @@ export class AuthService {
     });
     if (invite) {
       const url = await this.issueToken(email, 'INVITE');
-      await this.mail.sendInviteLink(email, url);
+      await this.mail.sendInviteLink(email, url, invite.firstName ?? undefined, invite.lastName ?? undefined);
       return;
     }
 
@@ -81,7 +81,12 @@ export class AuthService {
         }
         if (!user) {
           user = await tx.user.create({
-            data: { email: token.email, role: invite!.role },
+            data: {
+              email: token.email,
+              role: invite!.role,
+              firstName: invite!.firstName,
+              lastName: invite!.lastName,
+            },
           });
         }
         if (invite) {
@@ -106,9 +111,11 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         role: user.role,
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
       };
       const jwt = await this.jwt.signAsync(payload);
-      return { jwt, user: { id: user.id, email: user.email, role: user.role } };
+      return { jwt, user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName ?? undefined, lastName: user.lastName ?? undefined } };
     });
   }
 
@@ -116,9 +123,9 @@ export class AuthService {
    * Mint an INVITE magic link for an email and send the invite email.
    * Called by the invites flow after an invite row is created.
    */
-  async sendInviteEmail(email: string): Promise<void> {
+  async sendInviteEmail(email: string, firstName?: string, lastName?: string): Promise<void> {
     const url = await this.issueToken(email.trim().toLowerCase(), 'INVITE');
-    await this.mail.sendInviteLink(email, url);
+    await this.mail.sendInviteLink(email, url, firstName, lastName);
   }
 
   /** Mint a raw token, store only its hash, return the full magic-link URL. */

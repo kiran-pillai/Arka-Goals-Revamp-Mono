@@ -20,7 +20,7 @@ export class CheckInsService {
     return this.prisma.checkIn.findMany({
       where: mine ? { userId } : undefined,
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: { email: true } } },
+      include: { user: { select: { email: true, firstName: true, lastName: true } } },
     });
   }
 }

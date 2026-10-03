@@ -37,11 +37,12 @@ export class MailService {
     );
   }
 
-  async sendInviteLink(email: string, url: string): Promise<void> {
+  async sendInviteLink(email: string, url: string, firstName?: string, lastName?: string): Promise<void> {
+    const greeting = firstName ? `<p>Hi ${firstName}${lastName ? ' ' + lastName : ''}!</p>` : '';
     await this.send(
       email,
       "You're invited to Cheetah Squad",
-      `<p>You've been invited to Cheetah Squad. Tap the link below to join.
+      `${greeting}<p>You've been invited to Cheetah Squad. Tap the link below to join.
        It expires in 7 days and can be used once.</p>
        <p><a href="${url}">Join Cheetah Squad</a></p>`,
     );

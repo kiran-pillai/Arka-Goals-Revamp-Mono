@@ -13,7 +13,7 @@ import type {
 } from '../../../generated/prisma/client';
 
 export class CreateGoalDto {
-  @IsEnum(['WEEKLY', 'MONTHLY', 'QUARTERLY', 'GIVE_UP'])
+  @IsEnum(['QUARTERLY'])
   type: GoalType;
 
   @IsEnum(['ACTION_BASED', 'PASS_FAIL'])
@@ -34,7 +34,7 @@ export class CreateGoalDto {
   targetValue?: number;
 
   @IsOptional()
-  @IsEnum(['MONTHLY', 'QUARTERLY'])
+  @IsEnum(['QUARTERLY'])
   periodChoice?: GoalPeriodChoice;
 
   @IsOptional()

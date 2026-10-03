@@ -36,11 +36,13 @@ export class InvitesService {
       data: {
         email,
         role: dto.role ?? 'MEMBER',
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         invitedById,
       },
     });
 
-    await this.auth.sendInviteEmail(email);
+    await this.auth.sendInviteEmail(email, dto.firstName, dto.lastName);
     return invite;
   }
 

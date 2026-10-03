@@ -82,7 +82,7 @@ describe('CheckInsService', () => {
       expect(checkIn.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { createdAt: 'desc' },
-          include: { user: { select: { email: true } } },
+          include: { user: { select: { email: true, firstName: true, lastName: true } } },
         }),
       );
     });

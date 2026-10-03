@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsOptional } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString } from 'class-validator';
 import type { Role } from '../../../generated/prisma/client';
 
 export class CreateInviteDto {
@@ -9,4 +9,12 @@ export class CreateInviteDto {
   @IsOptional()
   @IsIn(['MEMBER', 'ADMIN'])
   role?: Role;
+
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 }

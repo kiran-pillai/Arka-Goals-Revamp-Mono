@@ -12,17 +12,17 @@ export class GoalsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateGoalDto) {
-    if (dto.type === 'MONTHLY' || dto.type === 'QUARTERLY') {
+    if (dto.type === 'QUARTERLY') {
       const existing = await this.prisma.goal.findFirst({
         where: {
           userId,
-          type: { in: ['MONTHLY', 'QUARTERLY'] },
+          type: 'QUARTERLY',
           status: 'ACTIVE',
         },
       });
       if (existing) {
         throw new BadRequestException(
-          `You already have an active ${existing.type.toLowerCase()} goal. You must choose monthly OR quarterly, not both.`,
+          'You already have an active quarterly goal.',
         );
       }
     }
@@ -41,12 +41,7 @@ export class GoalsService {
         title: dto.title,
         description: dto.description ?? '',
         targetValue: dto.measureType === 'ACTION_BASED' ? dto.targetValue : null,
-        periodChoice:
-          dto.type === 'MONTHLY'
-            ? 'MONTHLY'
-            : dto.type === 'QUARTERLY'
-              ? 'QUARTERLY'
-              : null,
+        periodChoice: dto.type === 'QUARTERLY' ? 'QUARTERLY' : null,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
       },
     });

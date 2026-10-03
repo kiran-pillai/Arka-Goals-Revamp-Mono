@@ -30,6 +30,8 @@ model User {
   id          String    @id @default(uuid())
   email       String    @unique @db.Citext
   role        Role      @default(MEMBER)
+  firstName   String?
+  lastName    String?
   createdAt   DateTime  @default(now())
   lastLoginAt DateTime?
 
@@ -57,6 +59,8 @@ model Invite {
   id          String       @id @default(uuid())
   email       String       @db.Citext
   role        Role         @default(MEMBER)
+  firstName   String?
+  lastName    String?
   status      InviteStatus @default(PENDING)
   invitedById String?
   invitedBy   User?        @relation("InvitedBy", fields: [invitedById], references: [id])
@@ -70,9 +74,7 @@ model Invite {
 
 enum GoalType {
   WEEKLY
-  MONTHLY
   QUARTERLY
-  GIVE_UP
 }
 
 enum MeasureType {
@@ -81,7 +83,6 @@ enum MeasureType {
 }
 
 enum GoalPeriodChoice {
-  MONTHLY
   QUARTERLY
 }
 
