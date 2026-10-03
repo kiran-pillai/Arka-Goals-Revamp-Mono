@@ -10,7 +10,7 @@ import LoginRoute from './routes/LoginRoute'
 import AuthCallbackRoute from './routes/AuthCallbackRoute'
 import AdminInvitesRoute from './routes/AdminInvitesRoute'
 import AppShellLayout from './AppShellLayout'
-import CheckInsTable from './CheckInsTable'
+import CheckInsPage from './CheckInsPage'
 import WeeklyCheckIn from './WeeklyCheckIn'
 import GoalSetup from './GoalSetup'
 import GoalsTable from './GoalsTable'
@@ -52,7 +52,7 @@ const layoutRoute = createRoute({
 const homeRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/',
-  component: CheckInsTable,
+  component: CheckInsPage,
 })
 
 const formRoute = createRoute({

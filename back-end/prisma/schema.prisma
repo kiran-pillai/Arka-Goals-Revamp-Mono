@@ -34,10 +34,12 @@ model User {
   lastName    String?
   createdAt   DateTime  @default(now())
   lastLoginAt DateTime?
+  colorSlot   Int?
 
   invitesSent Invite[]  @relation("InvitedBy")
   checkIns    CheckIn[]
   goals       Goal[]
+  comments    Comment[]
 }
 
 model CheckIn {
@@ -50,9 +52,23 @@ model CheckIn {
   wins          String
   frictions     String
   createdAt     DateTime @default(now())
+  comments      Comment[]
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  checkInId String
+  checkIn   CheckIn  @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([checkInId])
+  @@index([userId])
 }
 
 model Invite {

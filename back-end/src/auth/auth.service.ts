@@ -7,6 +7,7 @@ import { MailService } from '../mail/mail.service';
 import type { AppConfig } from '../config/configuration';
 import type { TokenPurpose } from '../../generated/prisma/client';
 import { AuthUser, JwtPayload } from './auth.types';
+import { assignColorSlot } from '../users/avatar-color';
 
 const LOGIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -80,12 +81,17 @@ export class AuthService {
           throw new BadRequestException('This link is invalid or has expired.');
         }
         if (!user) {
+          const existingUsers = await tx.user.findMany({ select: { colorSlot: true } });
+          const usedSlots = existingUsers.map((u) => u.colorSlot).filter((s): s is number => s != null);
+          const colorSlot = assignColorSlot(usedSlots);
+
           user = await tx.user.create({
             data: {
               email: token.email,
               role: invite!.role,
               firstName: invite!.firstName,
               lastName: invite!.lastName,
+              colorSlot,
             },
           });
         }

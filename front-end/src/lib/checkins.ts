@@ -21,3 +21,23 @@ export function useCreateCheckIn() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checkins'] }),
   })
 }
+
+/** Add a comment to a check-in, then refresh the lists. */
+export function useAddComment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ checkInId, text }: { checkInId: string; text: string }) =>
+      api(`/checkins/${checkInId}/comments`, { method: 'POST', body: { text } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['checkins'] }),
+  })
+}
+
+/** Delete a comment, then refresh the lists. */
+export function useDeleteComment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ checkInId, commentId }: { checkInId: string; commentId: string }) =>
+      api(`/checkins/${checkInId}/comments/${commentId}`, { method: 'DELETE' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['checkins'] }),
+  })
+}

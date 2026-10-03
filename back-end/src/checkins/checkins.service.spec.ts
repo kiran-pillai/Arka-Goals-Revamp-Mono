@@ -82,7 +82,23 @@ describe('CheckInsService', () => {
       expect(checkIn.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { createdAt: 'desc' },
-          include: { user: { select: { email: true, firstName: true, lastName: true } } },
+          include: { user: { select: { email: true, firstName: true, lastName: true, colorSlot: true } } },
+        }),
+      );
+    });
+
+    it('includes colorSlot in the user select for avatar rendering', async () => {
+      checkIn.findMany.mockResolvedValue([]);
+
+      await service.list('user-1', false);
+
+      expect(checkIn.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: {
+            user: {
+              select: expect.objectContaining({ colorSlot: true }),
+            },
+          },
         }),
       );
     });
