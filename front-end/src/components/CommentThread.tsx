@@ -9,7 +9,7 @@ type Props = {
   onDeleteComment: (id: string) => void
 }
 
-export default function CommentThread({ comments, onAddComment, onDeleteComment }: Props) {
+export default function CommentThread({ comments, onAddComment }: Props) {
   const [text, setText] = useState('')
 
   const handleSend = () => {
