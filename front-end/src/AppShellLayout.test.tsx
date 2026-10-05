@@ -39,10 +39,7 @@ vi.mock('@tanstack/react-router', () => ({
   }),
 }));
 
-// Mock the goals hook
-vi.mock('./lib/goals', () => ({
-  useIsGoalSetupLocked: () => false,
-}));
+
 
 import AppShellLayout from './AppShellLayout';
 import { useAuth } from './auth/AuthContext';

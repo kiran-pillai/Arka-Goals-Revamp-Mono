@@ -12,21 +12,6 @@ export class GoalsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateGoalDto) {
-    if (dto.type === 'QUARTERLY') {
-      const existing = await this.prisma.goal.findFirst({
-        where: {
-          userId,
-          type: 'QUARTERLY',
-          status: 'ACTIVE',
-        },
-      });
-      if (existing) {
-        throw new BadRequestException(
-          'You already have an active quarterly goal.',
-        );
-      }
-    }
-
     if (dto.measureType === 'ACTION_BASED' && !dto.targetValue) {
       throw new BadRequestException(
         'Action-based goals require a target value.',

@@ -13,7 +13,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useNavigate } from '@tanstack/react-router'
-import { useCreateGoal, useIsGoalSetupLocked } from './lib/goals'
+import { useCreateGoal } from './lib/goals'
 import type { MeasureType } from './goal'
 
 type FormValues = {
@@ -27,8 +27,6 @@ export default function GoalSetup() {
   const [submitted, setSubmitted] = useState(false)
   const createGoal = useCreateGoal()
   const navigate = useNavigate()
-  const locked = useIsGoalSetupLocked()
-
   const form = useForm<FormValues>({
     initialValues: {
       measureType: '',
@@ -62,20 +60,6 @@ export default function GoalSetup() {
         periodChoice: 'QUARTERLY',
       },
       { onSuccess: () => setSubmitted(true) },
-    )
-  }
-
-  if (locked) {
-    return (
-      <Stack align="center" gap="sm" py="xl">
-        <Title order={2}>Goals already set for this period</Title>
-        <Text c="dimmed">
-          You have already saved your quarterly goal for the current period.
-        </Text>
-        <Button color="arka" mt="sm" onClick={() => navigate({ to: '/goals' })}>
-          View Goals
-        </Button>
-      </Stack>
     )
   }
 
@@ -118,7 +102,7 @@ export default function GoalSetup() {
   return (
     <>
       <Title order={1} mb={4} fz={34}>
-        New Quarterly Goal
+        New Goal
       </Title>
       <Text c="dimmed" mb="xl">
         Goals must be specific and measurable. Stack at your own risk — it's

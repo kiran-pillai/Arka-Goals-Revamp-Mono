@@ -22,7 +22,6 @@ import {
   IconChevronsRight,
 } from '@tabler/icons-react'
 import { useAuth } from './auth/AuthContext'
-import { useIsGoalSetupLocked } from './lib/goals'
 
 const light = {
   amber: '#e6a532',
@@ -68,7 +67,6 @@ export default function AppShellLayout() {
   const currentPath = routerState.location.pathname
   const colorScheme = useComputedColorScheme('dark')
   const t = colorScheme === 'dark' ? dark : light
-  const goalSetupLocked = useIsGoalSetupLocked()
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
@@ -78,10 +76,6 @@ export default function AppShellLayout() {
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.adminOnly || user?.role === 'ADMIN',
-  ).map((item) =>
-    item.path === '/goals/new' && goalSetupLocked
-      ? { ...item, disabled: true, disabledTooltip: 'Goals are set for this period' }
-      : item,
   )
 
   function isActive(path: string) {

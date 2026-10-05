@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Group,
-  Progress,
   SegmentedControl,
   Stack,
   Table,
@@ -12,11 +11,6 @@ import {
 } from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
 import { useGoals } from './lib/goals'
-import type { Goal } from './goal'
-
-const typeLabel: Record<string, string> = {
-  QUARTERLY: 'Quarterly',
-}
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'blue',
@@ -25,25 +19,12 @@ const statusColor: Record<string, string> = {
   CANCELLED: 'gray',
 }
 
-function GoalProgress({ goal }: { goal: Goal }) {
-  if (goal.measureType === 'PASS_FAIL') {
-    return (
-      <Badge color={goal.status === 'COMPLETED' ? 'teal' : 'gray'} variant="light">
-        {goal.status === 'COMPLETED' ? 'Done' : 'Pending'}
-      </Badge>
-    )
-  }
-  const pct = goal.targetValue
-    ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
-    : 0
-  return (
-    <Stack gap={4}>
-      <Text size="xs" c="dimmed">
-        {goal.currentValue} / {goal.targetValue}
-      </Text>
-      <Progress value={pct} color="arka" size="sm" />
-    </Stack>
-  )
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 export default function GoalsTable() {
@@ -93,10 +74,9 @@ export default function GoalsTable() {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Member</Table.Th>
-                <Table.Th>Type</Table.Th>
                 <Table.Th>Goal</Table.Th>
                 <Table.Th>Measure</Table.Th>
-                <Table.Th>Progress</Table.Th>
+                <Table.Th>Created</Table.Th>
                 <Table.Th>Status</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -107,11 +87,6 @@ export default function GoalsTable() {
                     <Text size="sm" fw={600}>
                       {g.user.email}
                     </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge color="arka" variant="light" size="sm">
-                      {typeLabel[g.type] ?? g.type}
-                    </Badge>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" fw={500}>
@@ -130,8 +105,8 @@ export default function GoalsTable() {
                         : 'Pass/fail'}
                     </Text>
                   </Table.Td>
-                  <Table.Td w={160}>
-                    <GoalProgress goal={g} />
+                  <Table.Td>
+                    <Text size="sm">{formatDate(g.createdAt)}</Text>
                   </Table.Td>
                   <Table.Td>
                     <Badge
