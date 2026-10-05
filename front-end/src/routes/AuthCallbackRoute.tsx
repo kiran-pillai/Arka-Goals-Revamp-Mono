@@ -8,7 +8,7 @@ import { useAuth } from '../auth/AuthContext'
 export default function AuthCallbackRoute() {
   const { token } = useSearch({ from: '/auth/callback' })
   const navigate = useNavigate()
-  const { refresh } = useAuth()
+  const { refresh, user } = useAuth()
   const ran = useRef(false)
 
   const verify = useMutation({
@@ -16,9 +16,14 @@ export default function AuthCallbackRoute() {
       api('/auth/verify', { method: 'POST', body: { token: t } }),
     onSuccess: async () => {
       await refresh()
-      navigate({ to: '/' })
     },
   })
+
+  useEffect(()=>{
+    if(user){
+      navigate({ to: '/' })
+    }
+  }, [user, navigate])
 
   useEffect(() => {
     // Guard against React StrictMode double-invoke / single-use token.
