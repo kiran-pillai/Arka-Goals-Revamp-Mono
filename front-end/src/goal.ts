@@ -7,7 +7,7 @@ export type GoalInput = {
   type: GoalType
   measureType: MeasureType
   title: string
-  description?: string
+  description: string
   targetValue?: number
   periodChoice?: GoalPeriodChoice
   dueDate?: string

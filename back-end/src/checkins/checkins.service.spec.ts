@@ -9,6 +9,7 @@ const dto: CreateCheckInDto = {
   commitments: 'Wire up the table',
   wins: 'Auth landed',
   frictions: 'Local db was down',
+  rating: 4,
 };
 
 describe('CheckInsService', () => {

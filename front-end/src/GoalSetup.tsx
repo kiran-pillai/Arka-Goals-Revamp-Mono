@@ -39,6 +39,7 @@ export default function GoalSetup() {
     validate: {
       measureType: (v) => (v ? null : 'Choose how this goal is measured.'),
       title: (v) => (v.trim() ? null : 'Give your goal a title.'),
+      description: (v) => (v.trim() ? null : 'Description is required'),
       targetValue: (v, values) =>
         values.measureType === 'ACTION_BASED' && (!v || v < 1)
           ? 'Enter a target number (at least 1).'
@@ -53,7 +54,7 @@ export default function GoalSetup() {
         type: 'QUARTERLY',
         measureType: values.measureType as MeasureType,
         title: values.title,
-        description: values.description || undefined,
+        description: values.description,
         targetValue:
           values.measureType === 'ACTION_BASED' && values.targetValue
             ? Number(values.targetValue)
@@ -141,10 +142,11 @@ export default function GoalSetup() {
           />
 
           <Textarea
-            label="Description (optional)"
+            label="Description"
             placeholder="Add details, milestones, or context..."
             autosize
             minRows={2}
+            withAsterisk
             {...form.getInputProps('description')}
           />
 

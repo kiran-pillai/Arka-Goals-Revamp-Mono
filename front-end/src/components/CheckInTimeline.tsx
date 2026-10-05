@@ -174,6 +174,11 @@ export default function CheckInTimeline({ checkIns, onAddComment, onDeleteCommen
                         </Text>
                       </Box>
 
+                      {c.rating != null && (
+                        <Badge variant="light" color="arka">
+                          Rating: {c.rating}/5
+                        </Badge>
+                      )}
                       <Badge
                         color={c.completedGoal ? 'teal' : 'red'}
                         variant="light"

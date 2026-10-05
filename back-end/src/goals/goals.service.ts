@@ -39,7 +39,7 @@ export class GoalsService {
         type: dto.type,
         measureType: dto.measureType,
         title: dto.title,
-        description: dto.description ?? '',
+        description: dto.description,
         targetValue: dto.measureType === 'ACTION_BASED' ? dto.targetValue : null,
         periodChoice: dto.type === 'QUARTERLY' ? 'QUARTERLY' : null,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,

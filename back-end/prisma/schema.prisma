@@ -51,6 +51,7 @@ model CheckIn {
   commitments   String
   wins          String
   frictions     String
+  rating        Int
   createdAt     DateTime @default(now())
   comments      Comment[]
 

@@ -1,4 +1,4 @@
-import { IsBoolean, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsInt, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class CreateCheckInDto {
   @IsBoolean()
@@ -19,4 +19,9 @@ export class CreateCheckInDto {
   @IsString()
   @MaxLength(5000)
   frictions: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating: number;
 }

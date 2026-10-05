@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   Alert,
+  Box,
   Button,
   Group,
   Radio,
@@ -8,13 +9,16 @@ import {
   Text,
   Textarea,
   Title,
+  UnstyledButton,
 } from '@mantine/core'
+import { IconStar, IconStarFilled } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { useNavigate } from '@tanstack/react-router'
 import { useCreateCheckIn } from './lib/checkins'
 
 type FormValues = {
   completedGoal: '' | 'yes' | 'no'
+  rating: number
   results: string
   commitments: string
   wins: string
@@ -29,6 +33,7 @@ export default function WeeklyCheckIn() {
   const form = useForm<FormValues>({
     initialValues: {
       completedGoal: '',
+      rating: 0,
       results: '',
       commitments: '',
       wins: '',
@@ -37,6 +42,7 @@ export default function WeeklyCheckIn() {
     validate: {
       completedGoal: (value) =>
         value ? null : 'Let us know if you completed your goal.',
+      rating: (v) => (v >= 1 && v <= 5 ? null : 'Rating is required'),
     },
   })
 
@@ -44,6 +50,7 @@ export default function WeeklyCheckIn() {
     createCheckIn.mutate(
       {
         completedGoal: values.completedGoal === 'yes',
+        rating: values.rating,
         results: values.results,
         commitments: values.commitments,
         wins: values.wins,
@@ -139,6 +146,28 @@ export default function WeeklyCheckIn() {
             minRows={3}
             {...form.getInputProps('frictions')}
           />
+
+          <Box>
+            <Text fw={500} size="sm" mb={4}>Performance Rating (1 = Poor, 5 = Outstanding)</Text>
+            <Group mt={5} gap={4}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <UnstyledButton
+                  key={star}
+                  onClick={() => form.setFieldValue('rating', star)}
+                  style={{ lineHeight: 1 }}
+                >
+                  {star <= form.values.rating ? (
+                    <IconStarFilled size={32} color="var(--mantine-color-arka-4)" />
+                  ) : (
+                    <IconStar size={32} color="var(--mantine-color-dimmed)" style={{ opacity: 0.4 }} />
+                  )}
+                </UnstyledButton>
+              ))}
+            </Group>
+            {form.errors.rating && (
+              <Text size="xs" c="red" mt={4}>{form.errors.rating}</Text>
+            )}
+          </Box>
 
           <Group justify="flex-end" mt="sm">
             <Button type="submit" color="arka" loading={createCheckIn.isPending}>

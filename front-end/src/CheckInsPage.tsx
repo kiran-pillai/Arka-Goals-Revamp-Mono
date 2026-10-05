@@ -1,9 +1,12 @@
 import { useState } from 'react'
-import { Group, SegmentedControl, Stack, Text, Title } from '@mantine/core'
+import { Button, Group, SegmentedControl, Stack, Text, Title } from '@mantine/core'
+import { IconPlus } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
 import { useCheckIns, useAddComment, useDeleteComment } from './lib/checkins'
 import CheckInTimeline from './components/CheckInTimeline'
 
 export default function CheckInsPage() {
+  const navigate = useNavigate()
   const [scope, setScope] = useState<'mine' | 'squad'>('mine')
   const checkIns = useCheckIns(scope === 'mine')
   const addComment = useAddComment()
@@ -16,6 +19,13 @@ export default function CheckInsPage() {
           <Title order={1} fz={30}>
             Squad Check-ins
           </Title>
+          <Button
+            leftSection={<IconPlus size={16} />}
+            color="arka"
+            onClick={() => navigate({ to: '/form' })}
+          >
+            Add Check-in
+          </Button>
         </Group>
 
         <SegmentedControl

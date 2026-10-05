@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
@@ -23,10 +24,10 @@ export class CreateGoalDto {
   @MaxLength(500)
   title: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(2000)
-  description?: string;
+  description: string;
 
   @IsOptional()
   @IsInt()

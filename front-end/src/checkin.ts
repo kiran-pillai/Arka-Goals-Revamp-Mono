@@ -5,6 +5,7 @@ export type CheckInInput = {
   commitments: string
   wins: string
   frictions: string
+  rating: number
 }
 
 export type CheckInUser = {
