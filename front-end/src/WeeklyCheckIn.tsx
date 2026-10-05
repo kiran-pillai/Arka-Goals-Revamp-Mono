@@ -42,6 +42,10 @@ export default function WeeklyCheckIn() {
     validate: {
       completedGoal: (value) =>
         value ? null : 'Let us know if you completed your goal.',
+      results: (v) => (v.trim() ? null : 'Results are required'),
+      commitments: (v) => (v.trim() ? null : 'Commitments are required'),
+      wins: (v) => (v.trim() ? null : 'This field is required'),
+      frictions: (v) => (v.trim() ? null : 'This field is required'),
       rating: (v) => (v >= 1 && v <= 5 ? null : 'Rating is required'),
     },
   })
@@ -117,6 +121,7 @@ export default function WeeklyCheckIn() {
             placeholder="What were the results?"
             autosize
             minRows={3}
+            withAsterisk
             {...form.getInputProps('results')}
           />
 
@@ -126,6 +131,7 @@ export default function WeeklyCheckIn() {
             placeholder="List the actions you're committing to..."
             autosize
             minRows={3}
+            withAsterisk
             {...form.getInputProps('commitments')}
           />
 
@@ -135,6 +141,7 @@ export default function WeeklyCheckIn() {
             placeholder="Share your wins..."
             autosize
             minRows={3}
+            withAsterisk
             {...form.getInputProps('wins')}
           />
 
@@ -144,6 +151,7 @@ export default function WeeklyCheckIn() {
             placeholder="What got in your way..."
             autosize
             minRows={3}
+            withAsterisk
             {...form.getInputProps('frictions')}
           />
 
