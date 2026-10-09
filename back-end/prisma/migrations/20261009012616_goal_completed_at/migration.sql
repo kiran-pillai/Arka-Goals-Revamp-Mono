@@ -1,0 +1,24 @@
+-- A goal now records when it was completed, so the UI can show a completion
+-- date instead of inferring one.
+--
+-- `updatedAt` can't answer this: it is an @updatedAt column, so any later edit
+-- to the goal — a title change, a check-in on progress — overwrites it. Only a
+-- dedicated column survives subsequent edits.
+--
+-- The column is nullable rather than backfilled. Goals that are already at
+-- status 'COMPLETED' were completed at an unknown time: the only timestamps on
+-- the row are `createdAt` (before completion) and `updatedAt` (the last edit of
+-- any kind, which may be long after completion), so neither is the completion
+-- time. Writing either one in would publish a fabricated date that reads as
+-- recorded fact. Those rows are therefore left NULL, meaning "completed, time
+-- not recorded", and clients must treat NULL as a real and permanent case
+-- rather than a transient gap.
+--
+-- No CHECK constraint ties the two columns together. `completedAt IS NOT NULL`
+-- does imply `status = 'COMPLETED'` going forward, but the converse cannot be
+-- required while the pre-existing COMPLETED rows above are legitimately NULL,
+-- and a one-directional constraint would be a new rule this change wasn't asked
+-- to introduce. The service owns the transition instead.
+
+-- AlterTable
+ALTER TABLE "Goal" ADD COLUMN     "completedAt" TIMESTAMP(3);

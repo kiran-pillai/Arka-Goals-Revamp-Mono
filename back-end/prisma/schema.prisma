@@ -94,9 +94,19 @@ enum GoalType {
   QUARTERLY
 }
 
+// A goal is exactly one of these two kinds. A HABIT_PROCESS goal is measured by
+// how often it repeats (see `frequencyCount` / `frequencyPeriod`); an OUTCOME
+// goal is measured by whether the result was hit.
 enum MeasureType {
-  ACTION_BASED
-  PASS_FAIL
+  HABIT_PROCESS
+  OUTCOME
+}
+
+enum FrequencyPeriod {
+  DAY
+  WEEK
+  MONTH
+  QUARTER
 }
 
 enum GoalPeriodChoice {
@@ -118,12 +128,32 @@ model Goal {
   measureType MeasureType
   title       String
   description String          @default("")
+  // Only OUTCOME goals may carry a targetValue; only HABIT_PROCESS goals may
+  // carry a frequency, and they must carry both halves of it. A CHECK
+  // constraint enforcing that shape is added in the migration SQL — Prisma
+  // can't express a cross-column constraint here.
+  //
+  // Goal creation no longer collects a targetValue, so new rows are always
+  // NULL here. The column is retained because rows migrated from the old
+  // ACTION_BASED kind still carry their target numbers, and that is how a
+  // quantified outcome stays distinguishable from a pass/fail one. The update
+  // path can also still set one on an OUTCOME goal.
   targetValue Int?
+  frequencyCount Int?
+  frequencyPeriod FrequencyPeriod?
   currentValue Int            @default(0)
   status      GoalStatus      @default(ACTIVE)
   periodChoice GoalPeriodChoice?
   dueDate     DateTime?
   lockedAt    DateTime?
+  // When this goal was marked COMPLETED. The server derives it from the status
+  // transition — it is never accepted from a client — and clears it again when
+  // a goal is reopened, so it can't hold a stale completion date. `updatedAt`
+  // can't answer this question because any later edit overwrites it.
+  //
+  // NULL means "no recorded completion time", which includes goals already at
+  // COMPLETED before this column existed.
+  completedAt DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 

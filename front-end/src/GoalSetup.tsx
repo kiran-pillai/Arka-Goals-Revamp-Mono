@@ -4,7 +4,10 @@ import {
   Button,
   Group,
   NumberInput,
+  Paper,
   Radio,
+  Select,
+  SimpleGrid,
   Stack,
   Text,
   Textarea,
@@ -14,13 +17,50 @@ import {
 import { useForm } from '@mantine/form'
 import { useNavigate } from '@tanstack/react-router'
 import { useCreateGoal } from './lib/goals'
-import type { MeasureType } from './goal'
+import type { FrequencyPeriod, MeasureType } from './goal'
+
+/** The SMART breakdown, rendered as cards inside the goal-framework panel. */
+const smartLetters: { letter: string; word: string; gloss: string }[] = [
+  {
+    letter: 'S',
+    word: 'Specific',
+    gloss: "Name the actual thing you'll do. “Get better” isn't a goal.",
+  },
+  {
+    letter: 'M',
+    word: 'Measurable',
+    gloss: "Put a number on it, so there's no arguing at quarter-end.",
+  },
+  {
+    letter: 'A',
+    word: 'Achievable',
+    gloss: "Hard enough to matter, close enough that you'd bet on yourself.",
+  },
+  {
+    letter: 'R',
+    word: 'Relevant',
+    gloss: "Tied to what you're actually here to move this quarter.",
+  },
+  {
+    letter: 'T',
+    word: 'Time-bound',
+    gloss: 'Has a date. Without one it drifts forever.',
+  },
+]
+
+const frequencyPeriods: { value: FrequencyPeriod; label: string }[] = [
+  { value: 'DAY', label: 'Day' },
+  { value: 'WEEK', label: 'Week' },
+  { value: 'MONTH', label: 'Month' },
+  { value: 'QUARTER', label: 'Quarter' },
+]
 
 type FormValues = {
   measureType: MeasureType | ''
   title: string
   description: string
-  targetValue: number | ''
+  frequencyCount: number | ''
+  frequencyPeriod: FrequencyPeriod | ''
 }
 
 export default function GoalSetup() {
@@ -32,31 +72,38 @@ export default function GoalSetup() {
       measureType: '',
       title: '',
       description: '',
-      targetValue: '',
+      frequencyCount: '',
+      frequencyPeriod: '',
     },
     validate: {
-      measureType: (v) => (v ? null : 'Choose how this goal is measured.'),
+      measureType: (v) => (v ? null : 'Choose what kind of goal this is.'),
       title: (v) => (v.trim() ? null : 'Give your goal a title.'),
       description: (v) => (v.trim() ? null : 'Description is required'),
-      targetValue: (v, values) =>
-        values.measureType === 'ACTION_BASED' && (!v || v < 1)
-          ? 'Enter a target number (at least 1).'
+      frequencyCount: (v, values) =>
+        values.measureType === 'HABIT_PROCESS' && (!v || v < 1)
+          ? 'Enter how many times (at least 1).'
+          : null,
+      frequencyPeriod: (v, values) =>
+        values.measureType === 'HABIT_PROCESS' && !v
+          ? 'Choose how often this repeats.'
           : null,
     },
   })
 
   function handleSubmit(values: FormValues) {
     if (!values.measureType) return
+    const isHabit = values.measureType === 'HABIT_PROCESS'
     createGoal.mutate(
       {
         type: 'QUARTERLY',
-        measureType: values.measureType as MeasureType,
+        measureType: values.measureType,
         title: values.title,
         description: values.description,
-        targetValue:
-          values.measureType === 'ACTION_BASED' && values.targetValue
-            ? Number(values.targetValue)
+        frequencyCount:
+          isHabit && values.frequencyCount
+            ? Number(values.frequencyCount)
             : undefined,
+        frequencyPeriod: isHabit ? values.frequencyPeriod || undefined : undefined,
         periodChoice: 'QUARTERLY',
       },
       { onSuccess: () => setSubmitted(true) },
@@ -105,9 +152,43 @@ export default function GoalSetup() {
         New Goal
       </Title>
       <Text c="dimmed" mb="xl">
-        Goals must be specific and measurable. Stack at your own risk — it's
-        all or nothing.
+        Goals must be specific and measurable.
       </Text>
+
+      <Stack gap="sm" mb="xl">
+        <Text fw={500}>Framework for setting goals: </Text>
+        <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, lg: 5 }} spacing="xs">
+          {smartLetters.map(({ letter, word, gloss }) => (
+            <Paper key={letter} withBorder radius="md" p="sm">
+              <Text fz={30} fw={700} lh={1.1} c="var(--mantine-color-arka-text)">
+                {letter}
+              </Text>
+              <Text size="sm" fw={600}>
+                {word}
+              </Text>
+              <Text size="xs" c="dimmed" style={{ overflowWrap: 'anywhere' }}>
+                {gloss}
+              </Text>
+            </Paper>
+          ))}
+        </SimpleGrid>
+        <Stack gap="xs" pl="lg">
+          <Text size="sm">
+            <Text span fw={600} inherit>
+              Weak:
+            </Text>{' '}
+            “Find a new job this quarter.” — not yours to decide, no number, no
+            date.
+          </Text>
+          <Text size="sm">
+            <Text span fw={600} inherit>
+              SMART:
+            </Text>{' '}
+            “Submit 100 job applications by December 31.” — about 8 a week, and
+            nobody else decides whether you hit submit.
+          </Text>
+        </Stack>
+      </Stack>
 
       <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
         <Stack gap="lg">
@@ -120,6 +201,7 @@ export default function GoalSetup() {
 
           <TextInput
             label="Goal title"
+            description="Say what you'll do and how much. Pick something nobody else has to approve."
             placeholder="e.g. Submit 100 job applications"
             withAsterisk
             {...form.getInputProps('title')}
@@ -127,6 +209,7 @@ export default function GoalSetup() {
 
           <Textarea
             label="Description"
+            description="Add the detail your squad would need to tell whether you hit it."
             placeholder="Add details, milestones, or context..."
             autosize
             minRows={2}
@@ -135,32 +218,42 @@ export default function GoalSetup() {
           />
 
           <Radio.Group
-            label="How is this goal measured?"
+            label="What kind of goal is this?"
+            description="A habit repeats on a schedule. An outcome lands once, by a date."
             withAsterisk
             {...form.getInputProps('measureType')}
           >
-            <Group mt="xs">
+            <Stack gap="xs" mt="xs">
               <Radio
-                value="ACTION_BASED"
-                label="Action-based (numeric target)"
+                value="HABIT_PROCESS"
+                label="Habit / process — a behavior you repeat on a schedule"
                 color="arka"
               />
               <Radio
-                value="PASS_FAIL"
-                label="Pass/fail (yes or no)"
+                value="OUTCOME"
+                label="Outcome — a result you either hit or miss"
                 color="arka"
               />
-            </Group>
+            </Stack>
           </Radio.Group>
 
-          {form.values.measureType === 'ACTION_BASED' && (
-            <NumberInput
-              label="Target number"
-              placeholder="e.g. 100"
-              min={1}
-              withAsterisk
-              {...form.getInputProps('targetValue')}
-            />
+          {form.values.measureType === 'HABIT_PROCESS' && (
+            <Group grow align="flex-start">
+              <NumberInput
+                label="How many times?"
+                placeholder="e.g. 3"
+                min={1}
+                withAsterisk
+                {...form.getInputProps('frequencyCount')}
+              />
+              <Select
+                label="Every"
+                placeholder="Pick a period"
+                data={frequencyPeriods}
+                withAsterisk
+                {...form.getInputProps('frequencyPeriod')}
+              />
+            </Group>
           )}
 
           <Group justify="flex-end" mt="sm">
