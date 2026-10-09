@@ -1,6 +1,6 @@
 # Arka Goals — Cheetah Squad
 
-A weekly goal-tracking app for squads within the Arka organization. Squad members submit weekly check-ins covering goal completion, results, commitments, wins, and frictions. Admins manage the roster through an invite-only system with passwordless magic-link authentication.
+A weekly goal-tracking app for the Cheetah Squad. Squad members submit weekly check-ins covering goal completion, results, commitments, wins, and frictions. Admins manage the roster through an invite-only system with passwordless magic-link authentication.
 
 ## Tech Stack
 
@@ -9,7 +9,7 @@ A weekly goal-tracking app for squads within the Arka organization. Squad member
 | Frontend  | React 19, Vite, Mantine v9, TanStack Router & Query |
 | Backend   | NestJS 11, Prisma 7 (PostgreSQL), Passport JWT      |
 | Database  | PostgreSQL 16                                        |
-| Mail      | Nodemailer (MailHog in dev)                          |
+| Mail      | Resend in production, Nodemailer + MailHog in dev    |
 | Dev tools | Tilt, Docker Compose                                 |
 
 ## Prerequisites
@@ -102,23 +102,28 @@ npm run dev          # starts Vite dev server on port 5173
 
 ### Backend (`back-end/.env`)
 
-| Variable           | Default                              | Description                          |
-| ------------------ | ------------------------------------ | ------------------------------------ |
-| `PORT`             | `3000`                               | Backend listen port                  |
-| `DATABASE_URL`     | `postgresql://postgres:postgres@localhost:5432/arka` | PostgreSQL connection string |
-| `JWT_SECRET`       | `dev-only-change-me`                 | Secret for signing JWTs              |
-| `APP_BASE_URL`     | `http://localhost:5173`              | Frontend origin (CORS + magic links) |
-| `SEED_ADMIN_EMAIL` | —                                    | Email for the initial admin account  |
-| `SMTP_HOST`        | `localhost`                          | SMTP server host                     |
-| `SMTP_PORT`        | `1025`                               | SMTP server port                     |
-| `MAIL_FROM`        | `Cheetah Squad <noreply@arka.local>` | Sender address for emails            |
-| `NODE_ENV`         | `development`                        | Environment flag                     |
+| Variable           | Default                              | Description                                                                 |
+| ------------------ | ------------------------------------ | --------------------------------------------------------------------------- |
+| `DATABASE_URL`     | — (required)                         | PostgreSQL connection string. Locally: `postgresql://postgres:postgres@localhost:5432/arka` |
+| `NODE_ENV`         | `development`                        | Set to `production` to switch email from MailHog SMTP to the Resend API      |
+| `PORT`             | `3000`                               | Backend listen port. Production listens on `8080`                            |
+| `JWT_SECRET`       | `dev-only-change-me`                 | Secret for signing session JWTs. Must be set to a real secret in production  |
+| `APP_BASE_URL`     | `http://localhost:5173`              | Frontend origin, used for CORS and for building magic-link URLs             |
+| `MAIL_FROM`        | `Cheetah Squad <noreply@arka.local>` | Sender address for sign-in and invite emails                                 |
+| `SMTP_API_KEY`     | — (empty)                            | Resend API key. Required when `NODE_ENV=production`; ignored otherwise        |
+| `SMTP_HOST`        | `localhost`                          | SMTP host for local mail capture. Ignored when `NODE_ENV=production`          |
+| `SMTP_PORT`        | `1025`                               | SMTP port for local mail capture. Ignored when `NODE_ENV=production`          |
+| `SEED_ADMIN_EMAIL` | — (optional)                         | Seeds the first admin account on `npm run db:migrate`; skipped if unset       |
+
+Despite the `SMTP_` prefix, `SMTP_API_KEY` is a **Resend** API key, not an SMTP
+credential. In production the backend sends through the Resend HTTP API and the
+`SMTP_HOST` / `SMTP_PORT` values go unused; locally it does the reverse.
 
 ### Frontend (`front-end/.env`)
 
-| Variable       | Default                  | Description        |
-| -------------- | ------------------------ | ------------------ |
-| `VITE_API_URL` | `http://localhost:3000`  | Backend API origin |
+| Variable       | Default                 | Description                                                      |
+| -------------- | ----------------------- | ---------------------------------------------------------------- |
+| `VITE_API_URL` | `http://localhost:3000` | Backend API origin. Only `VITE_`-prefixed vars reach the browser |
 
 ## Authentication
 
