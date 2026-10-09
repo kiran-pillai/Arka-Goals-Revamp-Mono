@@ -1,0 +1,77 @@
+name: Feature request
+description: Suggest a new capability or an improvement to an existing one
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Describing the problem you're trying to solve is
+        more useful than describing a specific solution — it leaves room for a
+        better one.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: What are you trying to do today, and what gets in the way?
+      placeholder: |
+        As a squad member, I want to ... because right now I have to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to see?
+      description: Your suggested behavior. Rough sketches and screenshots welcome.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the app
+      multiple: true
+      options:
+        - Sign in / magic link
+        - Invites / onboarding
+        - Goals
+        - Weekly check-ins
+        - Admin / user management
+        - Email notifications
+        - Navigation / layout
+        - Reporting / analytics
+        - Something new
+    validations:
+      required: true
+
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who is this for?
+      multiple: true
+      options:
+        - Squad members
+        - Squad leads
+        - Admins
+        - Everyone
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds
+      description: How are you handling this now? What else did you consider?
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Mockups, links to similar features elsewhere, related issues.
+    validations:
+      required: false

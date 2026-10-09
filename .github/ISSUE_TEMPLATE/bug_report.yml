@@ -1,0 +1,91 @@
+name: Bug report
+description: Something in Arka Goals is broken or behaving unexpectedly
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more detail you give,
+        the faster it can be reproduced and fixed.
+
+        Please do **not** include passwords, magic-link URLs, or JWTs in this
+        report — a magic link is a working credential.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear description of the problem, and what you expected instead.
+      placeholder: |
+        What I did:
+        What I expected:
+        What actually happened:
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps someone else can follow to see the same thing.
+      placeholder: |
+        1. Sign in as a squad member
+        2. Go to Goals
+        3. Click "Add goal"
+        4. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the app
+      description: Where did you run into this? Pick "Not sure" if it isn't obvious.
+      multiple: true
+      options:
+        - Sign in / magic link
+        - Invites / onboarding
+        - Goals
+        - Weekly check-ins
+        - Admin / user management
+        - Email notifications
+        - Navigation / layout
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: frequency
+    attributes:
+      label: How often does it happen?
+      placeholder: "Example: every time I submit a check-in / happened once this week"
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: "Example: Chrome 141 on macOS, or Safari on iPhone 15"
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, console errors, or logs
+      description: |
+        Drag images in directly.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Workarounds you found, when it started, related issues.
+    validations:
+      required: false
