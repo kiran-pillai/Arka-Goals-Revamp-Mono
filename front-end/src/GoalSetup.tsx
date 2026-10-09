@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Accordion,
   Alert,
   Button,
   Group,
@@ -155,40 +156,55 @@ export default function GoalSetup() {
         Goals must be specific and measurable.
       </Text>
 
-      <Stack gap="sm" mb="xl">
-        <Text fw={500}>Framework for setting goals: </Text>
-        <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, lg: 5 }} spacing="xs">
-          {smartLetters.map(({ letter, word, gloss }) => (
-            <Paper key={letter} withBorder radius="md" p="sm">
-              <Text fz={30} fw={700} lh={1.1} c="var(--mantine-color-arka-text)">
-                {letter}
-              </Text>
-              <Text size="sm" fw={600}>
-                {word}
-              </Text>
-              <Text size="xs" c="dimmed" style={{ overflowWrap: 'anywhere' }}>
-                {gloss}
-              </Text>
-            </Paper>
-          ))}
-        </SimpleGrid>
-        <Stack gap="xs" pl="lg">
-          <Text size="sm">
-            <Text span fw={600} inherit>
-              Weak:
-            </Text>{' '}
-            “Find a new job this quarter.” — not yours to decide, no number, no
-            date.
-          </Text>
-          <Text size="sm">
-            <Text span fw={600} inherit>
-              SMART:
-            </Text>{' '}
-            “Submit 100 job applications by December 31.” — about 8 a week, and
-            nobody else decides whether you hit submit.
-          </Text>
-        </Stack>
-      </Stack>
+      <Accordion variant="contained" radius="md" mb="xl">
+        <Accordion.Item value="smart">
+          <Accordion.Control>
+            <Text component="span" fw={500}>
+              Framework for setting goals
+            </Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Stack gap="sm">
+              <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, lg: 5 }} spacing="xs">
+                {smartLetters.map(({ letter, word, gloss }) => (
+                  <Paper key={letter} withBorder radius="md" p="sm">
+                    <Text
+                      fz={30}
+                      fw={700}
+                      lh={1.1}
+                      c="var(--mantine-color-arka-text)"
+                    >
+                      {letter}
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {word}
+                    </Text>
+                    <Text size="xs" c="dimmed" style={{ overflowWrap: 'anywhere' }}>
+                      {gloss}
+                    </Text>
+                  </Paper>
+                ))}
+              </SimpleGrid>
+              <Stack gap="xs">
+                <Text size="sm">
+                  <Text span fw={600} inherit>
+                    Weak:
+                  </Text>{' '}
+                  “Find a new job this quarter.” — not yours to decide, no
+                  number, no date.
+                </Text>
+                <Text size="sm">
+                  <Text span fw={600} inherit>
+                    SMART:
+                  </Text>{' '}
+                  “Submit 100 job applications by December 31.” — about 8 a
+                  week, and nobody else decides whether you hit submit.
+                </Text>
+              </Stack>
+            </Stack>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
 
       <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
         <Stack gap="lg">
