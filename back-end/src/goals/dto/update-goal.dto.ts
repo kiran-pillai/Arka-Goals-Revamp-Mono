@@ -16,7 +16,7 @@ export class UpdateGoalDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(20000)
   description?: string;
 
   @IsOptional()

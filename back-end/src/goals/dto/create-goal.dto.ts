@@ -27,7 +27,7 @@ export class CreateGoalDto {
 
   @IsNotEmpty()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(20000)
   description: string;
 
   // Creation never collects a target value, for either kind of goal. The field
