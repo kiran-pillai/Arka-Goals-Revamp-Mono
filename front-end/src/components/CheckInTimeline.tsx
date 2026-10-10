@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Badge, Box, Group, Stack, Text, UnstyledButton } from '@mantine/core'
 import { IconActivity, IconClock, IconMessageCircle, IconThumbUp, IconThumbDown } from '@tabler/icons-react'
 import type { CheckIn } from '../checkin'
 import { getAvatarColor, getInitials } from '../lib/avatar-color'
 import CommentThread from './CommentThread'
+import CreatedTimestamp from './CreatedTimestamp'
 
 function getWeekMonday(date: Date): Date {
   const d = new Date(date)
@@ -32,13 +33,34 @@ function formatWeekLabel(monday: Date): string {
 type WeekGroup = { label: string; items: CheckIn[] }
 
 type Props = {
+  targetId?: string
+  selectionKey?: string
+  onTargetArrival?: () => void
   checkIns: CheckIn[]
   onAddComment: (checkInId: string, text: string) => void
   onDeleteComment: (checkInId: string, commentId: string) => void
 }
 
-export default function CheckInTimeline({ checkIns, onAddComment, onDeleteComment }: Props) {
+export default function CheckInTimeline({ checkIns, onAddComment, onDeleteComment, targetId, selectionKey, onTargetArrival }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const consumed = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (targetId && checkIns.some(c => c.id === targetId)) {
+      setExpanded(previous => new Set([...previous, targetId]))
+    }
+  }, [targetId, selectionKey, checkIns])
+  useEffect(() => {
+    if (!targetId) { consumed.current = undefined; return }
+    const key = selectionKey ?? targetId
+    if (!targetId || !expanded.has(targetId) || consumed.current === key) return
+    const element = document.getElementById(`checkin-${targetId}`)
+    if (!element) return
+    consumed.current = key
+    element.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+    element.focus({ preventScroll: true })
+    onTargetArrival?.()
+  }, [targetId, selectionKey, expanded, onTargetArrival])
 
   const weeks = useMemo(() => {
     const sorted = [...checkIns].sort(
@@ -100,7 +122,7 @@ export default function CheckInTimeline({ checkIns, onAddComment, onDeleteCommen
               const commentCount = c.comments?.length ?? 0
 
               return (
-                <Box key={c.id} style={{ position: 'relative' }}>
+                <Box key={c.id} id={`checkin-${c.id}`} tabIndex={-1} style={{ position: 'relative', scrollMarginTop: 76, outlineColor: 'var(--mantine-color-arka-6)' }}>
                   <Box
                     style={{
                       position: 'absolute',
@@ -152,7 +174,7 @@ export default function CheckInTimeline({ checkIns, onAddComment, onDeleteCommen
                         {initials}
                       </Box>
 
-                      <Box style={{ flex: 1 }}>
+                      <Box style={{ flex: 1, minWidth: 0 }}>
                         <Group gap={8}>
                           <Text fw={600} size="sm">
                             {name}
@@ -169,9 +191,7 @@ export default function CheckInTimeline({ checkIns, onAddComment, onDeleteCommen
                             </Badge>
                           )}
                         </Group>
-                        <Text size="xs" c="dimmed">
-                          {formatDate(new Date(c.createdAt))}
-                        </Text>
+                        <CreatedTimestamp value={c.createdAt} />
                       </Box>
 
                       {c.rating != null && (

@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { InvitesModule } from './invites/invites.module';
 import { CheckInsModule } from './checkins/checkins.module';
 import { GoalsModule } from './goals/goals.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -17,6 +18,7 @@ import configuration from './config/configuration';
     InvitesModule,
     CheckInsModule,
     GoalsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

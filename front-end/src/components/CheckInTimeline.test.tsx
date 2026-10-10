@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom/vitest';
@@ -173,3 +173,27 @@ describe('CheckInTimeline', () => {
     expect(screen.getAllByText('Marcus Johnson').length).toBeGreaterThanOrEqual(1);
   });
 });
+
+it('waits for data, expands before scrolling, focuses, and does not replay on refetch', async () => {
+  const scroll = vi.fn(function (this: HTMLElement) {
+    expect(withinTarget(this, 'Shipped onboarding')).toBe(true);
+  });
+  HTMLElement.prototype.scrollIntoView = scroll;
+  const arrived = vi.fn();
+  const view = (items: CheckIn[], key = 'selection-1', targetId: string | undefined = 'c1') => (
+    <MantineProvider><CheckInTimeline checkIns={items} targetId={targetId} selectionKey={key} onTargetArrival={arrived} onAddComment={vi.fn()} onDeleteComment={vi.fn()} /></MantineProvider>
+  );
+  const { rerender } = render(view([]));
+  expect(scroll).not.toHaveBeenCalled();
+  rerender(view(CHECKINS));
+  await waitFor(() => expect(arrived).toHaveBeenCalledTimes(1));
+  expect(document.activeElement).toBe(document.getElementById('checkin-c1'));
+  rerender(view([...CHECKINS]));
+  expect(scroll).toHaveBeenCalledTimes(1);
+  rerender(view(CHECKINS, 'selection-2'));
+  await waitFor(() => expect(scroll).toHaveBeenCalledTimes(2));
+  rerender(view(CHECKINS, '', ''));
+  rerender(view(CHECKINS));
+  await waitFor(() => expect(scroll).toHaveBeenCalledTimes(3));
+});
+function withinTarget(element: HTMLElement, text: string) { return element.textContent?.includes(text); }

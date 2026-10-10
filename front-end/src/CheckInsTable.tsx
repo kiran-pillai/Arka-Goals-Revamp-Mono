@@ -9,6 +9,7 @@ import {
   Title,
 } from '@mantine/core'
 import { useCheckIns } from './lib/checkins'
+import CreatedTimestamp from './components/CreatedTimestamp'
 
 /** Return the Monday (start of ISO week) for a given date. */
 function getWeekMonday(date: Date): Date {
@@ -122,7 +123,7 @@ export default function CheckInsTable() {
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Date</Table.Th>
+                <Table.Th>Date & time</Table.Th>
                 <Table.Th>Member</Table.Th>
                 <Table.Th ta="center">Weekly Goal Completed?</Table.Th>
                 <Table.Th>Results Related to Goal</Table.Th>
@@ -170,9 +171,7 @@ export default function CheckInsTable() {
                       }
                     >
                       <Table.Td>
-                        <Text size="sm" c="dimmed">
-                          {formatDate(new Date(c.createdAt))}
-                        </Text>
+                        <CreatedTimestamp value={c.createdAt} />
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" fw={600}>

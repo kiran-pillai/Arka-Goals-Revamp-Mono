@@ -52,6 +52,13 @@ const layoutRoute = createRoute({
 const homeRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/',
+  validateSearch: (search: Record<string, unknown>): { checkInId?: string; notificationId?: string } => {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return {
+      checkInId: typeof search.checkInId === 'string' && uuid.test(search.checkInId) ? search.checkInId : undefined,
+      notificationId: typeof search.notificationId === 'string' && uuid.test(search.notificationId) ? search.notificationId : undefined,
+    }
+  },
   component: CheckInsPage,
 })
 

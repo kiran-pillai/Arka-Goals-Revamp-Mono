@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Box, Button, Group, Stack, Text, Textarea } from '@mantine/core'
 import type { Comment } from '../checkin'
 import { getAvatarColor, getInitials } from '../lib/avatar-color'
+import CreatedTimestamp from './CreatedTimestamp'
 
 type Props = {
   comments: Comment[]
@@ -66,6 +67,7 @@ export default function CommentThread({ comments, onAddComment }: Props) {
                 <Text size="sm" fw={600}>
                   {name}
                 </Text>
+                <CreatedTimestamp value={c.createdAt} />
                 <Text size="sm" c="dimmed">
                   {c.text}
                 </Text>

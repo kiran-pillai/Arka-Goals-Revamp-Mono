@@ -12,13 +12,23 @@ describe('CommentsService', () => {
     delete: jest.fn(),
   };
 
+  const checkIn = { findUnique: jest.fn() };
+  const notification = { create: jest.fn() };
   beforeEach(async () => {
     jest.resetAllMocks();
+    checkIn.findUnique.mockResolvedValue({ userId: 'owner' });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommentsService,
-        { provide: PrismaService, useValue: { comment } },
+        {
+          provide: PrismaService,
+          useValue: {
+            comment,
+            $transaction: (fn: (tx: unknown) => unknown) =>
+              fn({ comment, checkIn, notification }),
+          },
+        },
       ],
     }).compile();
 
@@ -41,6 +51,32 @@ describe('CommentsService', () => {
     });
   });
 
+  it('creates a notification for the owner in the comment transaction', async () => {
+    comment.create.mockResolvedValue({ id: 'comment' });
+    await service.addComment('author', 'checkin', 'Hello');
+    expect(notification.create).toHaveBeenCalledWith({
+      data: { recipientId: 'owner', commentId: 'comment' },
+    });
+  });
+  it('propagates notification failures so the transaction rolls back', async () => {
+    comment.create.mockResolvedValue({ id: 'comment' });
+    notification.create.mockRejectedValue(new Error('write failed'));
+    await expect(
+      service.addComment('author', 'checkin', 'Hello'),
+    ).rejects.toThrow('write failed');
+  });
+  it('does not notify for self-comments', async () => {
+    comment.create.mockResolvedValue({ id: 'comment' });
+    await service.addComment('owner', 'checkin', 'Hello');
+    expect(notification.create).not.toHaveBeenCalled();
+  });
+  it('rejects a missing check-in before creating a comment', async () => {
+    checkIn.findUnique.mockResolvedValue(null);
+    await expect(
+      service.addComment('author', 'missing', 'Hello'),
+    ).rejects.toThrow(NotFoundException);
+    expect(comment.create).not.toHaveBeenCalled();
+  });
   describe('listComments', () => {
     it('returns comments for a check-in, newest first, with author info', async () => {
       comment.findMany.mockResolvedValue([]);
@@ -52,7 +88,13 @@ describe('CommentsService', () => {
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
-            select: { id: true, email: true, firstName: true, lastName: true, colorSlot: true },
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              colorSlot: true,
+            },
           },
         },
       });
@@ -60,7 +102,7 @@ describe('CommentsService', () => {
   });
 
   describe('deleteComment', () => {
-    it('removes the caller\'s own comment', async () => {
+    it("removes the caller's own comment", async () => {
       comment.findUnique.mockResolvedValue({
         id: 'cmt-1',
         userId: 'user-1',
@@ -74,15 +116,15 @@ describe('CommentsService', () => {
       });
     });
 
-    it('throws ForbiddenException when deleting another user\'s comment', async () => {
+    it("throws ForbiddenException when deleting another user's comment", async () => {
       comment.findUnique.mockResolvedValue({
         id: 'cmt-1',
         userId: 'user-2',
       });
 
-      await expect(
-        service.deleteComment('user-1', 'cmt-1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.deleteComment('user-1', 'cmt-1')).rejects.toThrow(
+        ForbiddenException,
+      );
 
       expect(comment.delete).not.toHaveBeenCalled();
     });

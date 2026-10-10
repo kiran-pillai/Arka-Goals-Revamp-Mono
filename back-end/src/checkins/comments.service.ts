@@ -10,8 +10,18 @@ export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   addComment(userId: string, checkInId: string, text: string) {
-    return this.prisma.comment.create({
-      data: { userId, checkInId, text },
+    return this.prisma.$transaction(async (tx) => {
+      const checkIn = await tx.checkIn.findUnique({ where: { id: checkInId } });
+      if (!checkIn) throw new NotFoundException('Check-in not found.');
+      const comment = await tx.comment.create({
+        data: { userId, checkInId, text },
+      });
+      if (checkIn.userId !== userId) {
+        await tx.notification.create({
+          data: { recipientId: checkIn.userId, commentId: comment.id },
+        });
+      }
+      return comment;
     });
   }
 
@@ -21,7 +31,13 @@ export class CommentsService {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-          select: { id: true, email: true, firstName: true, lastName: true, colorSlot: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            colorSlot: true,
+          },
         },
       },
     });

@@ -1,11 +1,9 @@
 import {
   AppShell,
-  Avatar,
   Burger,
   Button,
   Group,
   ScrollArea,
-  Text,
   Tooltip,
   UnstyledButton,
 } from '@mantine/core'
@@ -21,6 +19,7 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
 } from '@tabler/icons-react'
+import NotificationInbox from './components/NotificationInbox'
 import { useAuth } from './auth/AuthContext'
 
 const light = {
@@ -151,17 +150,7 @@ export default function AppShellLayout() {
           </Group>
 
           <Group gap="sm">
-            {user && (
-              user.firstName && user.lastName ? (
-                <Avatar color="arka" radius="xl" size="md">
-                  {user.firstName[0]}{user.lastName[0]}
-                </Avatar>
-              ) : (
-                <Text size="sm" c="dimmed" visibleFrom="sm">
-                  {user.email}
-                </Text>
-              )
-            )}
+            {user && <NotificationInbox />}
             <Button
               variant="subtle"
               color="gray"

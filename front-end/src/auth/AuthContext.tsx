@@ -40,6 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await api('/auth/logout', { method: 'POST' })
+    await qc.cancelQueries({ queryKey: ['notifications'] })
+    qc.removeQueries({ queryKey: ['notifications'] })
     qc.setQueryData(ME_KEY, null)
   }, [qc])
 

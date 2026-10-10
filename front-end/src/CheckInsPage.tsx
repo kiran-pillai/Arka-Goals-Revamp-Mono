@@ -1,14 +1,22 @@
 import { useState } from 'react'
 import { Button, Group, SegmentedControl, Stack, Text, Title } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useCheckIns, useAddComment, useDeleteComment } from './lib/checkins'
+import { useReadNotification } from './lib/notifications'
 import CheckInTimeline from './components/CheckInTimeline'
 
 export default function CheckInsPage() {
   const navigate = useNavigate()
+  const search = useSearch({ from: '/authenticated/' })
+  const readNotification = useReadNotification()
+  const clearTarget = () => navigate({ to: '/', search: {}, replace: true })
+  const acknowledge = () => {
+    if (search.notificationId) readNotification.mutate(search.notificationId, { onSuccess: () => { void clearTarget() } })
+    else void clearTarget()
+  }
   const [scope, setScope] = useState<'mine' | 'squad'>('mine')
-  const checkIns = useCheckIns(scope === 'mine')
+  const checkIns = useCheckIns(search.checkInId ? true : scope === 'mine')
   const addComment = useAddComment()
   const deleteComment = useDeleteComment()
 
@@ -29,8 +37,8 @@ export default function CheckInsPage() {
         </Group>
 
         <SegmentedControl
-          value={scope}
-          onChange={(v) => setScope(v as 'mine' | 'squad')}
+          value={search.checkInId ? 'mine' : scope}
+          onChange={(v) => { setScope(v as 'mine' | 'squad'); if (search.checkInId) void clearTarget() }}
           data={[
             { label: 'My check-ins', value: 'mine' },
             { label: 'Whole squad', value: 'squad' },
@@ -39,7 +47,11 @@ export default function CheckInsPage() {
         />
       </Stack>
 
-      {checkIns.isLoading ? (
+      {search.checkInId && checkIns.isSuccess && !checkIns.data.some(c => c.id === search.checkInId) && (
+        <Stack mb="md"><Text role="alert">This check-in is no longer available.</Text><Button onClick={acknowledge}>Dismiss notification</Button></Stack>
+      )}
+      {readNotification.isError && <Stack mb="md"><Text role="alert">Could not mark the notification read.</Text><Button onClick={acknowledge}>Retry</Button></Stack>}
+      {checkIns.isError ? <Stack><Text role="alert">Could not load check-ins.</Text><Button onClick={() => void checkIns.refetch()}>Retry</Button></Stack> : checkIns.isLoading ? (
         <Stack align="center" py="xl">
           <Text c="dimmed">Loading…</Text>
         </Stack>
@@ -52,6 +64,9 @@ export default function CheckInsPage() {
         </Stack>
       ) : (
         <CheckInTimeline
+          targetId={search.checkInId}
+          selectionKey={`${search.checkInId ?? ''}:${search.notificationId ?? ''}`}
+          onTargetArrival={acknowledge}
           checkIns={checkIns.data ?? []}
           onAddComment={(checkInId, text) =>
             addComment.mutate({ checkInId, text })
