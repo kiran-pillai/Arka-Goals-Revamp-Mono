@@ -6,10 +6,10 @@ import {
   ScrollArea,
   Tooltip,
   UnstyledButton,
-} from '@mantine/core'
-import { useComputedColorScheme } from '@mantine/core'
-import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+} from "@mantine/core";
+import { useComputedColorScheme } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   IconHome,
   IconClipboardText,
@@ -18,72 +18,77 @@ import {
   IconMailForward,
   IconChevronsLeft,
   IconChevronsRight,
-} from '@tabler/icons-react'
-import NotificationInbox from './components/NotificationInbox'
-import { useAuth } from './auth/AuthContext'
+} from "@tabler/icons-react";
+import NotificationInbox from "./components/NotificationInbox";
+import { useAuth } from "./auth/AuthContext";
 
 const light = {
-  amber: '#e6a532',
-  bronze: '#a85f22',
-  border: '#ecdcc0',
-  navBg: '#fffdf8',
-  brandPillBg: 'rgba(244, 243, 236, 0.5)',
-  activeItemBg: 'rgba(230, 165, 50, 0.12)',
-  hoverItemBg: 'rgba(230, 165, 50, 0.06)',
-}
+  amber: "#e6a532",
+  bronze: "#a85f22",
+  border: "#ecdcc0",
+  navBg: "#fffdf8",
+  brandPillBg: "rgba(244, 243, 236, 0.5)",
+  activeItemBg: "rgba(230, 165, 50, 0.12)",
+  hoverItemBg: "rgba(230, 165, 50, 0.06)",
+};
 
 const dark = {
-  amber: '#f0b849',
-  bronze: '#d08a3a',
-  border: '#3a3226',
-  navBg: '#1d1a15',
-  brandPillBg: 'rgba(47, 48, 58, 0.5)',
-  activeItemBg: 'rgba(230, 165, 50, 0.15)',
-  hoverItemBg: 'rgba(230, 165, 50, 0.08)',
-}
+  amber: "#f0b849",
+  bronze: "#d08a3a",
+  border: "#3a3226",
+  navBg: "#1d1a15",
+  brandPillBg: "rgba(47, 48, 58, 0.5)",
+  activeItemBg: "rgba(230, 165, 50, 0.15)",
+  hoverItemBg: "rgba(230, 165, 50, 0.08)",
+};
 
 interface NavItem {
-  label: string
-  icon: typeof IconHome
-  path: string
-  adminOnly?: boolean
-  disabled?: boolean
-  disabledTooltip?: string
+  label: string;
+  icon: typeof IconHome;
+  path: string;
+  adminOnly?: boolean;
+  disabled?: boolean;
+  disabledTooltip?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'View Check-Ins', icon: IconHome, path: '/' },
-  { label: 'Enter Weekly Form', icon: IconClipboardText, path: '/form' },
-  { label: 'Set Goals', icon: IconTargetArrow, path: '/goals/new' },
-  { label: 'View Goals', icon: IconListCheck, path: '/goals' },
-  { label: 'Manage Invites', icon: IconMailForward, path: '/admin/invites', adminOnly: true },
-]
+  { label: "View Check-Ins", icon: IconHome, path: "/" },
+  { label: "Enter Weekly Form", icon: IconClipboardText, path: "/form" },
+  { label: "Set Goals", icon: IconTargetArrow, path: "/goals/new" },
+  { label: "View Goals", icon: IconListCheck, path: "/goals" },
+  {
+    label: "Manage Invites",
+    icon: IconMailForward,
+    path: "/admin/invites",
+    adminOnly: true,
+  },
+];
 
 export default function AppShellLayout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const routerState = useRouterState()
-  const currentPath = routerState.location.pathname
-  const colorScheme = useComputedColorScheme('dark')
-  const t = colorScheme === 'dark' ? dark : light
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
+  const colorScheme = useComputedColorScheme("dark");
+  const t = colorScheme === "dark" ? dark : light;
 
-  const isMobile = useMediaQuery('(max-width: 768px)')
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
-  const [collapsed, { toggle: toggleCollapsed }] = useDisclosure(false)
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [collapsed, { toggle: toggleCollapsed }] = useDisclosure(false);
 
-  const navbarCollapsed = isMobile ? !mobileOpened : collapsed
+  const navbarCollapsed = isMobile ? !mobileOpened : collapsed;
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.adminOnly || user?.role === 'ADMIN',
-  )
+    (item) => !item.adminOnly || user?.role === "ADMIN",
+  );
 
   function isActive(path: string) {
-    return currentPath === path
+    return currentPath === path;
   }
 
   async function handleSignOut() {
-    await logout()
-    navigate({ to: '/login' })
+    await logout();
+    navigate({ to: "/login" });
   }
 
   return (
@@ -91,7 +96,7 @@ export default function AppShellLayout() {
       header={{ height: 60 }}
       navbar={{
         width: navbarCollapsed ? 60 : 240,
-        breakpoint: 'sm',
+        breakpoint: "sm",
         collapsed: { mobile: !mobileOpened },
       }}
       padding="md"
@@ -102,7 +107,7 @@ export default function AppShellLayout() {
         navbar: {
           borderRight: `1px solid ${t.border}`,
           backgroundColor: t.navBg,
-          transition: 'width 200ms ease',
+          transition: "width 200ms ease",
         },
       }}
     >
@@ -117,10 +122,10 @@ export default function AppShellLayout() {
             />
             <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
+                display: "inline-flex",
+                alignItems: "center",
                 gap: 10,
-                padding: '8px 18px 8px 8px',
+                padding: "8px 18px 8px 8px",
                 border: `1px solid ${t.border}`,
                 borderRadius: 999,
                 background: t.brandPillBg,
@@ -132,8 +137,8 @@ export default function AppShellLayout() {
                 style={{
                   width: 28,
                   height: 28,
-                  borderRadius: '50%',
-                  display: 'block',
+                  borderRadius: "50%",
+                  display: "block",
                 }}
               />
               <span
@@ -166,58 +171,56 @@ export default function AppShellLayout() {
       <AppShell.Navbar>
         <AppShell.Section grow component={ScrollArea} py="sm">
           {visibleItems.map((item) => {
-            const active = isActive(item.path)
-            const Icon = item.icon
-            const disabled = !!item.disabled
+            const active = isActive(item.path);
+            const Icon = item.icon;
+            const disabled = !!item.disabled;
 
             const button = (
               <UnstyledButton
                 key={item.path}
                 onClick={() => {
-                  if (disabled) return
-                  navigate({ to: item.path })
-                  if (isMobile) toggleMobile()
+                  if (disabled) return;
+                  navigate({ to: item.path });
+                  if (isMobile) toggleMobile();
                 }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 10,
-                  width: '100%',
-                  padding: navbarCollapsed ? '10px 0' : '10px 16px',
-                  justifyContent: navbarCollapsed ? 'center' : 'flex-start',
+                  width: "100%",
+                  padding: navbarCollapsed ? "10px 0" : "10px 16px",
+                  justifyContent: navbarCollapsed ? "center" : "flex-start",
                   borderLeft: active
                     ? `3px solid ${t.bronze}`
-                    : '3px solid transparent',
-                  backgroundColor: active
-                    ? t.activeItemBg
-                    : 'transparent',
+                    : "3px solid transparent",
+                  backgroundColor: active ? t.activeItemBg : "transparent",
                   color: active ? t.bronze : undefined,
                   fontWeight: active ? 600 : 500,
                   fontSize: 14,
                   borderRadius: 0,
-                  transition: 'background-color 150ms ease',
+                  transition: "background-color 150ms ease",
                   ...(disabled && {
                     opacity: 0.5,
-                    cursor: 'not-allowed',
+                    cursor: "not-allowed",
                   }),
                 }}
                 onMouseEnter={(e) => {
                   if (!active && !disabled) {
-                    ;(e.currentTarget as HTMLElement).style.backgroundColor =
-                      t.hoverItemBg
+                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                      t.hoverItemBg;
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!active && !disabled) {
-                    ;(e.currentTarget as HTMLElement).style.backgroundColor =
-                      'transparent'
+                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                      "transparent";
                   }
                 }}
               >
                 <Icon size={20} stroke={1.5} />
                 {!navbarCollapsed && <span>{item.label}</span>}
               </UnstyledButton>
-            )
+            );
 
             if (disabled && item.disabledTooltip) {
               return (
@@ -229,7 +232,7 @@ export default function AppShellLayout() {
                 >
                   {button}
                 </Tooltip>
-              )
+              );
             }
 
             if (navbarCollapsed) {
@@ -242,10 +245,10 @@ export default function AppShellLayout() {
                 >
                   {button}
                 </Tooltip>
-              )
+              );
             }
 
-            return button
+            return button;
           })}
         </AppShell.Section>
 
@@ -254,14 +257,14 @@ export default function AppShellLayout() {
             onClick={toggleCollapsed}
             visibleFrom="sm"
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 6,
-              width: '100%',
-              padding: navbarCollapsed ? '10px 0' : '10px 16px',
-              justifyContent: navbarCollapsed ? 'center' : 'flex-start',
+              width: "100%",
+              padding: navbarCollapsed ? "10px 0" : "10px 16px",
+              justifyContent: navbarCollapsed ? "center" : "flex-start",
               fontSize: 12,
-              color: '#888',
+              color: "#888",
               borderTop: `1px solid ${t.border}`,
             }}
           >
@@ -277,28 +280,9 @@ export default function AppShellLayout() {
         </AppShell.Section>
       </AppShell.Navbar>
 
-      <AppShell.Main
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 'calc(100vh - 60px)',
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <Outlet />
-        </div>
-        <footer
-          style={{
-            textAlign: 'center',
-            fontSize: 12,
-            letterSpacing: 0.3,
-            color: '#888',
-            padding: '16px 0',
-          }}
-        >
-          An Arka organization squad
-        </footer>
+      <AppShell.Main>
+        <Outlet />
       </AppShell.Main>
     </AppShell>
-  )
+  );
 }

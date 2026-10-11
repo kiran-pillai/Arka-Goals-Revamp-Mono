@@ -234,7 +234,7 @@ export default function GoalsTable() {
           )}
         </Stack>
       ) : (
-        <Stack gap="md">
+        <Stack gap="sm">
           {rows.map((g) => {
             const isOwn = currentUserId !== null && g.userId === currentUserId;
             const isCompleted = g.status === "COMPLETED";
@@ -257,7 +257,7 @@ export default function GoalsTable() {
                 }
               >
                 <div className="goal-card-rail">
-                  <IconTargetArrow size={28} stroke={1.6} aria-hidden="true" />
+                  <IconTargetArrow size={24} stroke={1.6} aria-hidden="true" />
                   <div className="goal-card-rail-measure">
                     <span className="goal-card-rail-value">
                       {g.measureType === "HABIT_PROCESS"
@@ -279,7 +279,7 @@ export default function GoalsTable() {
                     </span>
                   </div>
                 </div>
-                <Stack gap="sm" className="goal-card-body">
+                <Stack gap={6} className="goal-card-body">
                   <Group justify="space-between" gap="sm" wrap="wrap">
                     <Text className="goal-card-kind">
                       {g.measureType === "HABIT_PROCESS"
@@ -334,9 +334,9 @@ export default function GoalsTable() {
                     gap="sm"
                     wrap="wrap"
                   >
-                    <Group gap="sm" className="goal-card-member" wrap="nowrap">
+                    <Group gap={6} className="goal-card-member" wrap="nowrap">
                       <Avatar
-                        size={30}
+                        size={22}
                         radius="xl"
                         className="goal-card-avatar"
                       >
@@ -346,16 +346,16 @@ export default function GoalsTable() {
                           g.user.email,
                         )}
                       </Avatar>
-                      <Stack gap={2} className="goal-card-member-details">
-                        <Text className="goal-card-member-name">
+                      <Text className="goal-card-member-details">
+                        <span className="goal-card-member-name">
                           {memberName(g.user)}
-                        </Text>
-                        <Text className="goal-card-date">
-                          Created {formatDate(g.createdAt)}
+                        </span>
+                        <span className="goal-card-date">
+                          {` · Created ${formatDate(g.createdAt)}`}
                           {isCompleted &&
                             ` · Completed ${g.completedAt ? formatDate(g.completedAt) : "—"}`}
-                        </Text>
-                      </Stack>
+                        </span>
+                      </Text>
                     </Group>
                     <Group gap="xs">
                       {/* No action at all on someone else's goal: the server

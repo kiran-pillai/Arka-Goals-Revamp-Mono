@@ -17,13 +17,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  min-height: 100dvh;
   gap: 24px;
   padding: 40px 20px;
   background: var(--glow), var(--bg);
 }
 
 .login-card {
+  margin-block: auto;
+  flex-shrink: 0;
   width: 100%;
   max-width: 560px;
   box-sizing: border-box;
@@ -119,7 +121,9 @@
   border-radius: 12px;
   background: var(--field-bg);
   color: var(--text-h);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .login-form input::placeholder {
   color: color-mix(in srgb, var(--text) 70%, transparent);
@@ -129,7 +133,7 @@
   border-color: var(--amber);
   box-shadow: 0 0 0 3px rgba(230, 165, 50, 0.25);
 }
-.login-form input[aria-invalid='true'] {
+.login-form input[aria-invalid="true"] {
   border-color: #d1453b;
 }
 
@@ -150,7 +154,10 @@
   cursor: pointer;
   background: linear-gradient(100deg, var(--amber), var(--bronze));
   box-shadow: 0 6px 16px rgba(168, 95, 34, 0.35);
-  transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s,
+    filter 0.12s;
 }
 .submit:hover {
   filter: brightness(1.05);
@@ -207,13 +214,6 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-/* --- Footer --- */
-.login-footer {
-  font-size: 12px;
-  letter-spacing: 0.3px;
-  color: var(--text);
 }
 
 /* --- Dark mode --- */
