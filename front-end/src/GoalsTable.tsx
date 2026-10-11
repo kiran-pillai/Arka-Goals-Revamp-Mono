@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  Accordion,
   Alert,
   Badge,
   Button,
@@ -302,19 +303,28 @@ export default function GoalsTable() {
                     </Group>
                   </Group>
 
-                  {g.description && (
+                  {g.description && (g.description.length > 2000 ? (
+                    <Accordion variant="contained" radius="md">
+                      <Accordion.Item value="description">
+                        <Accordion.Control>Read full goal description</Accordion.Control>
+                        <Accordion.Panel>
+                          <Text size="sm" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+                            {g.description}
+                          </Text>
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+                  ) : (
                     <Text
                       size="sm"
                       style={{
-                        // Full text, never clamped: unreadable two-line
-                        // descriptions are the thing this screen fixes.
                         whiteSpace: 'pre-wrap',
                         overflowWrap: 'anywhere',
                       }}
                     >
                       {g.description}
                     </Text>
-                  )}
+                  ))}
 
                   <Group gap="xl" wrap="wrap">
                     <Meta
