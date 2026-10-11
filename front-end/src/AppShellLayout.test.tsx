@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom/vitest';
 
@@ -66,9 +67,9 @@ describe('AppShellLayout – user initials badge', () => {
     });
 
     render(
-      <MantineProvider>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { enabled: false } } })}><MantineProvider>
         <AppShellLayout />
-      </MantineProvider>,
+      </MantineProvider></QueryClientProvider>,
     );
 
     // Expect an initials badge showing "KP" (first letter of first name + first letter of last name)
@@ -91,9 +92,9 @@ describe('AppShellLayout – user initials badge', () => {
     });
 
     render(
-      <MantineProvider>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { enabled: false } } })}><MantineProvider>
         <AppShellLayout />
-      </MantineProvider>,
+      </MantineProvider></QueryClientProvider>,
     );
 
     // The raw email should no longer be displayed when name fields are available
@@ -115,9 +116,9 @@ describe('AppShellLayout – user initials badge', () => {
     });
 
     render(
-      <MantineProvider>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { enabled: false } } })}><MantineProvider>
         <AppShellLayout />
-      </MantineProvider>,
+      </MantineProvider></QueryClientProvider>,
     );
 
     const badge = screen.getByText('KP');
@@ -132,7 +133,7 @@ describe('AppShellLayout – user initials badge', () => {
            badge.parentElement).toContain(signOutButton);
   });
 
-  it('should fall back to email display when name fields are missing', () => {
+  it('should fall back to email initials when name fields are missing', () => {
     mockedUseAuth.mockReturnValue({
       user: {
         id: 'user-2',
@@ -145,12 +146,12 @@ describe('AppShellLayout – user initials badge', () => {
     });
 
     render(
-      <MantineProvider>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { enabled: false } } })}><MantineProvider>
         <AppShellLayout />
-      </MantineProvider>,
+      </MantineProvider></QueryClientProvider>,
     );
 
     // With no name fields, should still show the email
-    expect(screen.getByText('anon@example.com')).toBeInTheDocument();
+    expect(screen.getByText('AN')).toBeInTheDocument();
   });
 });

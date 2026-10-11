@@ -24,7 +24,12 @@ export class CommentsController {
     @Param('checkInId') checkInId: string,
     @Body() dto: CreateCommentDto,
   ) {
-    return this.comments.addComment(user.id, checkInId, dto.text);
+    return this.comments.addComment(
+      user.id,
+      checkInId,
+      dto.text,
+      dto.mentionedUserIds,
+    );
   }
 
   @Get()
@@ -33,10 +38,7 @@ export class CommentsController {
   }
 
   @Delete(':commentId')
-  remove(
-    @CurrentUser() user: AuthUser,
-    @Param('commentId') commentId: string,
-  ) {
+  remove(@CurrentUser() user: AuthUser, @Param('commentId') commentId: string) {
     return this.comments.deleteComment(user.id, commentId);
   }
 }
