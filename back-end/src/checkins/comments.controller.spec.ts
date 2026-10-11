@@ -34,7 +34,11 @@ describe('CommentsController', () => {
 
     app = module.createNestApplication();
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     );
     await app.init();
   });
@@ -56,7 +60,26 @@ describe('CommentsController', () => {
         'user-1',
         'checkin-1',
         'Nice work!',
+        undefined,
       );
+    });
+
+    it('validates and forwards selected mention IDs', async () => {
+      const id = 'e1184d44-b848-4b35-b608-08a89c02e799';
+      await request(app.getHttpServer())
+        .post('/checkins/checkin-1/comments')
+        .send({ text: '@Alex', mentionedUserIds: [id] })
+        .expect(201);
+      expect(comments.addComment).toHaveBeenCalledWith(
+        'user-1',
+        'checkin-1',
+        '@Alex',
+        [id],
+      );
+      await request(app.getHttpServer())
+        .post('/checkins/checkin-1/comments')
+        .send({ text: '@Alex', mentionedUserIds: ['invalid'] })
+        .expect(400);
     });
 
     it('rejects empty text', async () => {
@@ -81,7 +104,12 @@ describe('CommentsController', () => {
   describe('GET /checkins/:checkInId/comments', () => {
     it('returns comments for a check-in', async () => {
       const mockComments = [
-        { id: 'cmt-1', text: 'Great!', userId: 'user-1', checkInId: 'checkin-1' },
+        {
+          id: 'cmt-1',
+          text: 'Great!',
+          userId: 'user-1',
+          checkInId: 'checkin-1',
+        },
       ];
       comments.listComments.mockResolvedValue(mockComments);
 
@@ -95,7 +123,7 @@ describe('CommentsController', () => {
   });
 
   describe('DELETE /checkins/:checkInId/comments/:commentId', () => {
-    it('removes the caller\'s own comment', async () => {
+    it("removes the caller's own comment", async () => {
       comments.deleteComment.mockResolvedValue({ id: 'cmt-1' });
 
       await request(app.getHttpServer())
@@ -105,7 +133,7 @@ describe('CommentsController', () => {
       expect(comments.deleteComment).toHaveBeenCalledWith('user-1', 'cmt-1');
     });
 
-    it('returns 403 for another user\'s comment', async () => {
+    it("returns 403 for another user's comment", async () => {
       comments.deleteComment.mockRejectedValue(
         new ForbiddenException('You can only delete your own comments.'),
       );

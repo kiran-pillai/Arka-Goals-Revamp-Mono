@@ -66,6 +66,8 @@ export class NotificationsService {
       id: row.id,
       createdAt: row.createdAt,
       readAt: row.readAt,
+      kind: row.kind,
+      commentId: row.commentId,
       actor: comment.user,
       checkInId: comment.checkIn.id,
       checkInDate: comment.checkIn.createdAt,

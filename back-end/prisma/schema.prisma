@@ -66,7 +66,7 @@ model Comment {
   checkIn   CheckIn  @relation(fields: [checkInId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notification Notification?
+  notifications Notification[]
   text      String
   createdAt DateTime @default(now())
 
@@ -181,10 +181,12 @@ model Notification {
   id String @id @default(uuid())
   recipientId String
   recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
-  commentId String @unique
+  commentId String
   comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   readAt DateTime?
+  kind String @default("COMMENT")
+  @@unique([recipientId, commentId])
   @@index([recipientId, createdAt, id])
   @@index([recipientId, readAt])
 }

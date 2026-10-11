@@ -44,6 +44,8 @@ describe('NotificationsService', () => {
       id,
       createdAt,
       readAt: null,
+      kind: 'MENTION',
+      commentId: 'comment',
       comment: {
         user: {
           firstName: 'Author',
@@ -57,6 +59,11 @@ describe('NotificationsService', () => {
     const result = await service.list('owner', 'cursor', 1);
     expect(result.items.map((item) => item.id)).toEqual(['b']);
     expect(result.nextCursor).toBe('b');
+    expect(result.items[0]).toMatchObject({
+      kind: 'MENTION',
+      commentId: 'comment',
+      checkInId: 'checkin',
+    });
     expect(notification.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {

@@ -9,16 +9,44 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  addComment(userId: string, checkInId: string, text: string) {
+  addComment(
+    userId: string,
+    checkInId: string,
+    text: string,
+    mentionedUserIds: string[] = [],
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const checkIn = await tx.checkIn.findUnique({ where: { id: checkInId } });
       if (!checkIn) throw new NotFoundException('Check-in not found.');
       const comment = await tx.comment.create({
         data: { userId, checkInId, text },
       });
-      if (checkIn.userId !== userId) {
+      const mentionedUsers = mentionedUserIds.length
+        ? await tx.user.findMany({
+            where: { id: { in: [...new Set(mentionedUserIds)] } },
+            select: { id: true, firstName: true, lastName: true },
+          })
+        : [];
+      const recipients = new Map<string, string>();
+      if (checkIn.userId !== userId) recipients.set(checkIn.userId, 'COMMENT');
+      for (const user of mentionedUsers) {
+        const name = [user.firstName, user.lastName].filter(Boolean).join(' ');
+        const marker = `@${name}`;
+        if (
+          user.id !== userId &&
+          name &&
+          [...text.matchAll(/(?:^|\s)@/gu)].some((match) => {
+            const start = match.index + match[0].length - 1;
+            if (!text.startsWith(marker, start)) return false;
+            return !/^[\p{L}\p{N}_]/u.test(text.slice(start + marker.length));
+          })
+        ) {
+          recipients.set(user.id, 'MENTION');
+        }
+      }
+      for (const [recipientId, kind] of recipients) {
         await tx.notification.create({
-          data: { recipientId: checkIn.userId, commentId: comment.id },
+          data: { recipientId, commentId: comment.id, kind },
         });
       }
       return comment;

@@ -13,6 +13,7 @@ describe('CommentsService', () => {
   };
 
   const checkIn = { findUnique: jest.fn() };
+  const user = { findMany: jest.fn() };
   const notification = { create: jest.fn() };
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -26,7 +27,7 @@ describe('CommentsService', () => {
           useValue: {
             comment,
             $transaction: (fn: (tx: unknown) => unknown) =>
-              fn({ comment, checkIn, notification }),
+              fn({ comment, checkIn, notification, user }),
           },
         },
       ],
@@ -55,8 +56,51 @@ describe('CommentsService', () => {
     comment.create.mockResolvedValue({ id: 'comment' });
     await service.addComment('author', 'checkin', 'Hello');
     expect(notification.create).toHaveBeenCalledWith({
-      data: { recipientId: 'owner', commentId: 'comment' },
+      data: { recipientId: 'owner', commentId: 'comment', kind: 'COMMENT' },
     });
+  });
+  it('deduplicates multiple mentions and prefers mentions for the owner', async () => {
+    comment.create.mockResolvedValue({ id: 'comment' });
+    user.findMany.mockResolvedValue([
+      { id: 'owner', firstName: 'Bea', lastName: 'Smith' },
+      { id: 'other', firstName: 'Alex', lastName: null },
+      { id: 'author', firstName: 'Me', lastName: null },
+    ]);
+    await service.addComment(
+      'author',
+      'checkin',
+      '@Bea Smith @Alex @Alex @Me',
+      ['owner', 'other', 'other', 'author'],
+    );
+    expect(notification.create.mock.calls).toEqual([
+      [
+        {
+          data: { recipientId: 'owner', commentId: 'comment', kind: 'MENTION' },
+        },
+      ],
+      [
+        {
+          data: { recipientId: 'other', commentId: 'comment', kind: 'MENTION' },
+        },
+      ],
+    ]);
+  });
+  it.each(['@Alexander', 'foo@Alex', '@Alex𐐀'])(
+    'ignores edited or partial mention %s',
+    async (text) => {
+      comment.create.mockResolvedValue({ id: 'comment' });
+      user.findMany.mockResolvedValue([
+        { id: 'other', firstName: 'Alex', lastName: null },
+      ]);
+      await service.addComment('owner', 'checkin', text, ['other']);
+      expect(notification.create).not.toHaveBeenCalled();
+    },
+  );
+  it('does not infer mentions from unselected text', async () => {
+    comment.create.mockResolvedValue({ id: 'comment' });
+    await service.addComment('owner', 'checkin', '@Alex');
+    expect(user.findMany).not.toHaveBeenCalled();
+    expect(notification.create).not.toHaveBeenCalled();
   });
   it('propagates notification failures so the transaction rolls back', async () => {
     comment.create.mockResolvedValue({ id: 'comment' });

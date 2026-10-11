@@ -4,92 +4,106 @@ import {
   createRouter,
   Outlet,
   redirect,
-} from '@tanstack/react-router'
-import type { AuthUser } from './auth/auth'
-import LoginRoute from './routes/LoginRoute'
-import AuthCallbackRoute from './routes/AuthCallbackRoute'
-import AdminInvitesRoute from './routes/AdminInvitesRoute'
-import AppShellLayout from './AppShellLayout'
-import CheckInsPage from './CheckInsPage'
-import WeeklyCheckIn from './WeeklyCheckIn'
-import GoalSetup from './GoalSetup'
-import GoalsTable from './GoalsTable'
+} from "@tanstack/react-router";
+import type { AuthUser } from "./auth/auth";
+import LoginRoute from "./routes/LoginRoute";
+import AuthCallbackRoute from "./routes/AuthCallbackRoute";
+import AdminInvitesRoute from "./routes/AdminInvitesRoute";
+import AppShellLayout from "./AppShellLayout";
+import CheckInsPage from "./CheckInsPage";
+import WeeklyCheckIn from "./WeeklyCheckIn";
+import GoalSetup from "./GoalSetup";
+import GoalsTable from "./GoalsTable";
 
 export interface RouterContext {
-  auth: { user: AuthUser | null }
+  auth: { user: AuthUser | null };
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: Outlet,
-})
+});
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/login',
+  path: "/login",
   component: LoginRoute,
-})
+});
 
 const authCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/auth/callback',
+  path: "/auth/callback",
   validateSearch: (search: Record<string, unknown>) => ({
-    token: typeof search.token === 'string' ? search.token : '',
+    token: typeof search.token === "string" ? search.token : "",
   }),
   component: AuthCallbackRoute,
-})
+});
 
 const layoutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'authenticated',
+  id: "authenticated",
   beforeLoad: ({ context }) => {
     if (!context.auth.user) {
-      throw redirect({ to: '/login' })
+      throw redirect({ to: "/login" });
     }
   },
   component: AppShellLayout,
-})
+});
 
 const homeRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '/',
-  validateSearch: (search: Record<string, unknown>): { checkInId?: string; notificationId?: string } => {
-    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  path: "/",
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { checkInId?: string; notificationId?: string; commentId?: string } => {
+    const uuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return {
-      checkInId: typeof search.checkInId === 'string' && uuid.test(search.checkInId) ? search.checkInId : undefined,
-      notificationId: typeof search.notificationId === 'string' && uuid.test(search.notificationId) ? search.notificationId : undefined,
-    }
+      commentId:
+        typeof search.commentId === "string" && uuid.test(search.commentId)
+          ? search.commentId
+          : undefined,
+      checkInId:
+        typeof search.checkInId === "string" && uuid.test(search.checkInId)
+          ? search.checkInId
+          : undefined,
+      notificationId:
+        typeof search.notificationId === "string" &&
+        uuid.test(search.notificationId)
+          ? search.notificationId
+          : undefined,
+    };
   },
   component: CheckInsPage,
-})
+});
 
 const formRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '/form',
+  path: "/form",
   component: WeeklyCheckIn,
-})
+});
 
 const goalSetupRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '/goals/new',
+  path: "/goals/new",
   component: GoalSetup,
-})
+});
 
 const goalsRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '/goals',
+  path: "/goals",
   component: GoalsTable,
-})
+});
 
 const adminInvitesRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '/admin/invites',
+  path: "/admin/invites",
   beforeLoad: ({ context }) => {
-    if (context.auth.user!.role !== 'ADMIN') {
-      throw redirect({ to: '/' })
+    if (context.auth.user!.role !== "ADMIN") {
+      throw redirect({ to: "/" });
     }
   },
   component: AdminInvitesRoute,
-})
+});
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
@@ -101,15 +115,15 @@ const routeTree = rootRoute.addChildren([
     goalsRoute,
     adminInvitesRoute,
   ]),
-])
+]);
 
 export const router = createRouter({
   routeTree,
   context: { auth: { user: null } },
-})
+});
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
-    router: typeof router
+    router: typeof router;
   }
 }

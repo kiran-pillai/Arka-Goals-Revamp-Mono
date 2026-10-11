@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MantineProvider } from '@mantine/core';
-import '@testing-library/jest-dom/vitest';
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MantineProvider } from "@mantine/core";
+import "@testing-library/jest-dom/vitest";
 
 // Polyfill browser APIs for jsdom (needed by Mantine)
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
     matches: false,
@@ -27,8 +27,9 @@ class ResizeObserverMock {
 global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
 // Mock Mantine Textarea to avoid autosize crash in jsdom
-vi.mock('@mantine/core', async () => {
-  const actual = await vi.importActual<typeof import('@mantine/core')>('@mantine/core');
+vi.mock("@mantine/core", async () => {
+  const actual =
+    await vi.importActual<typeof import("@mantine/core")>("@mantine/core");
   return {
     ...actual,
     Textarea: (props: any) => (
@@ -43,44 +44,79 @@ vi.mock('@mantine/core', async () => {
   };
 });
 
-import CheckInTimeline from './CheckInTimeline';
-import type { CheckIn } from '../checkin';
+import CheckInTimeline from "./CheckInTimeline";
+import type { CheckIn } from "../checkin";
 
 const CHECKINS: CheckIn[] = [
   {
-    id: 'c1',
+    id: "c1",
     completedGoal: true,
-    results: 'Shipped onboarding',
-    commitments: 'Launch to 100%',
-    wins: 'Great collab',
-    frictions: 'CI flaky',
-    createdAt: '2026-10-01T12:00:00Z',
-    user: { email: 'sarah@ex.com', firstName: 'Sarah', lastName: 'Chen', colorSlot: 0 },
+    results: "Shipped onboarding",
+    commitments: "Launch to 100%",
+    wins: "Great collab",
+    frictions: "CI flaky",
+    createdAt: "2026-10-01T12:00:00Z",
+    user: {
+      email: "sarah@ex.com",
+      firstName: "Sarah",
+      lastName: "Chen",
+      colorSlot: 0,
+    },
     comments: [
-      { id: 'cm1', text: 'Nice work!', createdAt: '2026-10-01T14:00:00Z', user: { email: 'marcus@ex.com', firstName: 'Marcus', lastName: 'Johnson', colorSlot: 1 } },
-      { id: 'cm2', text: 'Agreed', createdAt: '2026-10-01T15:00:00Z', user: { email: 'alex@ex.com', firstName: 'Alex', lastName: 'Rivera', colorSlot: 3 } },
+      {
+        id: "cm1",
+        text: "Nice work!",
+        createdAt: "2026-10-01T14:00:00Z",
+        user: {
+          email: "marcus@ex.com",
+          firstName: "Marcus",
+          lastName: "Johnson",
+          colorSlot: 1,
+        },
+      },
+      {
+        id: "cm2",
+        text: "Agreed",
+        createdAt: "2026-10-01T15:00:00Z",
+        user: {
+          email: "alex@ex.com",
+          firstName: "Alex",
+          lastName: "Rivera",
+          colorSlot: 3,
+        },
+      },
     ],
   },
   {
-    id: 'c2',
+    id: "c2",
     completedGoal: false,
-    results: 'Got 80% through migration',
-    commitments: 'Finish migration',
-    wins: 'Fixed race condition',
-    frictions: 'Credential wait',
-    createdAt: '2026-10-01T10:00:00Z',
-    user: { email: 'marcus@ex.com', firstName: 'Marcus', lastName: 'Johnson', colorSlot: 1 },
+    results: "Got 80% through migration",
+    commitments: "Finish migration",
+    wins: "Fixed race condition",
+    frictions: "Credential wait",
+    createdAt: "2026-10-01T10:00:00Z",
+    user: {
+      email: "marcus@ex.com",
+      firstName: "Marcus",
+      lastName: "Johnson",
+      colorSlot: 1,
+    },
     comments: [],
   },
   {
-    id: 'c3',
+    id: "c3",
     completedGoal: true,
-    results: 'Finished prototype',
-    commitments: 'Incorporate feedback',
-    wins: 'User testing insightful',
-    frictions: 'Scheduling hard',
-    createdAt: '2026-09-24T12:00:00Z',
-    user: { email: 'sarah@ex.com', firstName: 'Sarah', lastName: 'Chen', colorSlot: 0 },
+    results: "Finished prototype",
+    commitments: "Incorporate feedback",
+    wins: "User testing insightful",
+    frictions: "Scheduling hard",
+    createdAt: "2026-09-24T12:00:00Z",
+    user: {
+      email: "sarah@ex.com",
+      firstName: "Sarah",
+      lastName: "Chen",
+      colorSlot: 0,
+    },
     comments: [],
   },
 ];
@@ -88,13 +124,17 @@ const CHECKINS: CheckIn[] = [
 function renderTimeline(checkins = CHECKINS) {
   return render(
     <MantineProvider>
-      <CheckInTimeline checkIns={checkins} onAddComment={vi.fn()} onDeleteComment={vi.fn()} />
+      <CheckInTimeline
+        checkIns={checkins}
+        onAddComment={vi.fn()}
+        onDeleteComment={vi.fn()}
+      />
     </MantineProvider>,
   );
 }
 
-describe('CheckInTimeline', () => {
-  it('renders week group headers', () => {
+describe("CheckInTimeline", () => {
+  it("renders week group headers", () => {
     renderTimeline();
 
     // Two different weeks in the test data
@@ -102,15 +142,15 @@ describe('CheckInTimeline', () => {
     expect(screen.getByText(/Week of Sep 21, 2026/)).toBeInTheDocument();
   });
 
-  it('renders timeline items with user avatar showing initials', () => {
+  it("renders timeline items with user avatar showing initials", () => {
     renderTimeline();
 
     // Sarah Chen -> SC, Marcus Johnson -> MJ
-    expect(screen.getAllByText('SC').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('MJ').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("SC").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("MJ").length).toBeGreaterThanOrEqual(1);
   });
 
-  it('maps avatar background color from colorSlot to AVATAR_COLOR_POOL', async () => {
+  it("maps avatar background color from colorSlot to AVATAR_COLOR_POOL", async () => {
     const { container } = renderTimeline();
 
     // The first avatar (Sarah, slot 0) should use the first pool color
@@ -119,81 +159,126 @@ describe('CheckInTimeline', () => {
 
     const firstAvatar = avatars[0] as HTMLElement;
     // AVATAR_COLOR_POOL[0] is '#e6a532' — jsdom normalizes to rgb
-    expect(firstAvatar.style.backgroundColor).toBe('rgb(230, 165, 50)');
+    expect(firstAvatar.style.backgroundColor).toBe("rgb(230, 165, 50)");
   });
 
-  it('shows goal met badge for completed goals', () => {
+  it("shows goal met badge for completed goals", () => {
     renderTimeline();
 
-    const goalMetBadges = screen.getAllByText('Goal met');
+    const goalMetBadges = screen.getAllByText("Goal met");
     expect(goalMetBadges.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('shows not met badge for incomplete goals', () => {
+  it("shows not met badge for incomplete goals", () => {
     renderTimeline();
 
-    expect(screen.getByText('Not met')).toBeInTheDocument();
+    expect(screen.getByText("Not met")).toBeInTheDocument();
   });
 
-  it('shows comment count pill on collapsed items with comments', () => {
+  it("shows comment count pill on collapsed items with comments", () => {
     renderTimeline();
 
     // c1 has 2 comments — should show "2" in a pill
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
   });
 
-  it('does not show comment count pill on items with no comments', () => {
+  it("does not show comment count pill on items with no comments", () => {
     renderTimeline([CHECKINS[1]]); // c2 has 0 comments
 
-    expect(screen.queryByTestId('comment-pill')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("comment-pill")).not.toBeInTheDocument();
   });
 
-  it('expands to show full check-in fields when clicked', async () => {
+  it("expands to show full check-in fields when clicked", async () => {
     const user = userEvent.setup();
     renderTimeline();
 
     // Fields should be hidden initially
-    expect(screen.queryByText('Shipped onboarding')).not.toBeInTheDocument();
+    expect(screen.queryByText("Shipped onboarding")).not.toBeInTheDocument();
 
     // Click the first timeline item header
-    const headers = screen.getAllByTestId('timeline-header');
+    const headers = screen.getAllByTestId("timeline-header");
     await user.click(headers[0]);
 
     // Now the results field should be visible
-    expect(screen.getByText('Shipped onboarding')).toBeInTheDocument();
-    expect(screen.getByText('Launch to 100%')).toBeInTheDocument();
-    expect(screen.getByText('Great collab')).toBeInTheDocument();
-    expect(screen.getByText('CI flaky')).toBeInTheDocument();
+    expect(screen.getByText("Shipped onboarding")).toBeInTheDocument();
+    expect(screen.getByText("Launch to 100%")).toBeInTheDocument();
+    expect(screen.getByText("Great collab")).toBeInTheDocument();
+    expect(screen.getByText("CI flaky")).toBeInTheDocument();
   });
 
-  it('shows member name on each timeline entry', () => {
+  it("shows member name on each timeline entry", () => {
     renderTimeline();
 
-    expect(screen.getAllByText('Sarah Chen').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('Marcus Johnson').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Sarah Chen").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Marcus Johnson").length).toBeGreaterThanOrEqual(
+      1,
+    );
   });
 });
 
-it('waits for data, expands before scrolling, focuses, and does not replay on refetch', async () => {
+it("waits for data, expands before scrolling, focuses, and does not replay on refetch", async () => {
   const scroll = vi.fn(function (this: HTMLElement) {
-    expect(withinTarget(this, 'Shipped onboarding')).toBe(true);
+    expect(withinTarget(this, "Shipped onboarding")).toBe(true);
   });
   HTMLElement.prototype.scrollIntoView = scroll;
   const arrived = vi.fn();
-  const view = (items: CheckIn[], key = 'selection-1', targetId: string | undefined = 'c1') => (
-    <MantineProvider><CheckInTimeline checkIns={items} targetId={targetId} selectionKey={key} onTargetArrival={arrived} onAddComment={vi.fn()} onDeleteComment={vi.fn()} /></MantineProvider>
+  const view = (
+    items: CheckIn[],
+    key = "selection-1",
+    targetId: string | undefined = "c1",
+  ) => (
+    <MantineProvider>
+      <CheckInTimeline
+        checkIns={items}
+        targetId={targetId}
+        selectionKey={key}
+        onTargetArrival={arrived}
+        onAddComment={vi.fn()}
+        onDeleteComment={vi.fn()}
+      />
+    </MantineProvider>
   );
   const { rerender } = render(view([]));
   expect(scroll).not.toHaveBeenCalled();
   rerender(view(CHECKINS));
   await waitFor(() => expect(arrived).toHaveBeenCalledTimes(1));
-  expect(document.activeElement).toBe(document.getElementById('checkin-c1'));
+  expect(document.activeElement).toBe(document.getElementById("checkin-c1"));
   rerender(view([...CHECKINS]));
   expect(scroll).toHaveBeenCalledTimes(1);
-  rerender(view(CHECKINS, 'selection-2'));
+  rerender(view(CHECKINS, "selection-2"));
   await waitFor(() => expect(scroll).toHaveBeenCalledTimes(2));
-  rerender(view(CHECKINS, '', ''));
+  rerender(view(CHECKINS, "", ""));
   rerender(view(CHECKINS));
   await waitFor(() => expect(scroll).toHaveBeenCalledTimes(3));
 });
-function withinTarget(element: HTMLElement, text: string) { return element.textContent?.includes(text); }
+function withinTarget(element: HTMLElement, text: string) {
+  return element.textContent?.includes(text);
+}
+
+it("focuses the exact comment and falls back to its check-in if deleted", async () => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+  const arrived = vi.fn();
+  const view = (targetCommentId: string) => (
+    <MantineProvider>
+      <CheckInTimeline
+        checkIns={CHECKINS}
+        targetId="c1"
+        targetCommentId={targetCommentId}
+        selectionKey={targetCommentId}
+        onTargetArrival={arrived}
+        onAddComment={vi.fn()}
+        onDeleteComment={vi.fn()}
+      />
+    </MantineProvider>
+  );
+  const { rerender } = render(view("cm2"));
+  await waitFor(() =>
+    expect(document.activeElement).toBe(document.getElementById("comment-cm2")),
+  );
+  expect(arrived).toHaveBeenCalledTimes(1);
+  rerender(view("deleted-comment"));
+  await waitFor(() =>
+    expect(document.activeElement).toBe(document.getElementById("checkin-c1")),
+  );
+  expect(arrived).toHaveBeenCalledTimes(2);
+});
