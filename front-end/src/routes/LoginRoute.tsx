@@ -1,30 +1,30 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { api } from '../lib/api'
-import '../Login.css'
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import "../Login.css";
 
 export default function LoginRoute() {
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
   const requestLink = useMutation({
     mutationFn: (addr: string) =>
-      api('/auth/request-link', { method: 'POST', body: { email: addr } }),
-  })
+      api("/auth/request-link", { method: "POST", body: { email: addr } }),
+  });
 
   function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    const trimmed = email.trim()
+    e.preventDefault();
+    const trimmed = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setError('Please enter a valid email address.')
-      return
+      setError("Please enter a valid email address.");
+      return;
     }
-    setError('')
-    requestLink.mutate(trimmed)
+    setError("");
+    requestLink.mutate(trimmed);
   }
 
-  const sent = requestLink.isSuccess
+  const sent = requestLink.isSuccess;
 
   return (
     <main className="login">
@@ -45,8 +45,14 @@ export default function LoginRoute() {
         {sent ? (
           <div className="sent" role="status">
             <svg className="sent-check" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor"
-                    strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M20 6 9 17l-5-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <h2>Check your email</h2>
             <p>
@@ -57,8 +63,8 @@ export default function LoginRoute() {
               type="button"
               className="link-btn"
               onClick={() => {
-                requestLink.reset()
-                setEmail('')
+                requestLink.reset();
+                setEmail("");
               }}
             >
               Use a different email
@@ -76,30 +82,34 @@ export default function LoginRoute() {
               value={email}
               aria-invalid={Boolean(error)}
               onChange={(e) => {
-                setEmail(e.target.value)
-                if (error) setError('')
+                setEmail(e.target.value);
+                if (error) setError("");
               }}
             />
-            {error && <p className="field-error" role="alert">{error}</p>}
+            {error && (
+              <p className="field-error" role="alert">
+                {error}
+              </p>
+            )}
             {requestLink.isError && (
               <p className="field-error" role="alert">
                 Something went wrong. Please try again.
               </p>
             )}
-            <button type="submit" className="submit" disabled={requestLink.isPending}>
-              {requestLink.isPending ? 'Sending…' : 'Send my sign-in link'}
+            <button
+              type="submit"
+              className="submit"
+              disabled={requestLink.isPending}
+            >
+              {requestLink.isPending ? "Sending…" : "Send my sign-in link"}
             </button>
             <p className="hint">
-              Cheetah Squad is invite-only. We&rsquo;ll email you a secure link&mdash;
-              no password to remember.
+              Cheetah Squad is invite-only. We&rsquo;ll email you a secure
+              link&mdash; no password to remember.
             </p>
           </form>
         )}
       </div>
-
-      <footer className="login-footer">
-        <span>An Arka organization squad</span>
-      </footer>
     </main>
-  )
+  );
 }
