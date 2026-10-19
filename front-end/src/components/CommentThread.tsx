@@ -243,7 +243,7 @@ export default function CommentThread({
                   {name}
                 </Text>
                 <CreatedTimestamp value={c.createdAt} />
-                <Text size="sm" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
+                <Text size="sm" fw={400} style={{ whiteSpace: "pre-wrap" }}>
                   {highlightMentions(c.text, users)}
                 </Text>
               </Box>
