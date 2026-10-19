@@ -14,11 +14,9 @@ import type { MentionUser } from "./CommentThread";
 import CommentThread from "./CommentThread";
 import CreatedTimestamp from "./CreatedTimestamp";
 
-function getWeekMonday(date: Date): Date {
+function getWeekSunday(date: Date): Date {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
+  d.setDate(d.getDate() - d.getDay());
   d.setHours(0, 0, 0, 0);
   return d;
 }
@@ -31,10 +29,10 @@ function formatDate(date: Date): string {
   });
 }
 
-function formatWeekLabel(monday: Date): string {
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  return `Week of ${formatDate(monday)} – ${formatDate(sunday)}`;
+function formatWeekLabel(sunday: Date): string {
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+  return `Week of ${formatDate(sunday)} – ${formatDate(saturday)}`;
 }
 
 type WeekGroup = { label: string; items: CheckIn[] };
@@ -102,15 +100,15 @@ export default function CheckInTimeline({
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     const groups: WeekGroup[] = [];
-    let lastMondayTime: number | null = null;
+    let lastSundayTime: number | null = null;
 
     for (const c of sorted) {
-      const monday = getWeekMonday(new Date(c.createdAt));
-      const mondayTime = monday.getTime();
+      const sunday = getWeekSunday(new Date(c.createdAt));
+      const sundayTime = sunday.getTime();
 
-      if (lastMondayTime === null || mondayTime !== lastMondayTime) {
-        groups.push({ label: formatWeekLabel(monday), items: [] });
-        lastMondayTime = mondayTime;
+      if (lastSundayTime === null || sundayTime !== lastSundayTime) {
+        groups.push({ label: formatWeekLabel(sunday), items: [] });
+        lastSundayTime = sundayTime;
       }
       groups[groups.length - 1].items.push(c);
     }

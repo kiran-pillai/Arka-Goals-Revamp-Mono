@@ -138,8 +138,29 @@ describe("CheckInTimeline", () => {
     renderTimeline();
 
     // Two different weeks in the test data
-    expect(screen.getByText(/Week of Sep 28, 2026/)).toBeInTheDocument();
-    expect(screen.getByText(/Week of Sep 21, 2026/)).toBeInTheDocument();
+    expect(
+      screen.getByText("Week of Sep 27, 2026 – Oct 3, 2026"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Week of Sep 20, 2026 – Sep 26, 2026"),
+    ).toBeInTheDocument();
+  });
+
+  it("starts a new group on Sunday and keeps Monday in that week", () => {
+    renderTimeline([
+      { ...CHECKINS[0], createdAt: new Date(2026, 9, 3, 12).toISOString() },
+      { ...CHECKINS[1], createdAt: new Date(2026, 9, 4, 12).toISOString() },
+      { ...CHECKINS[2], createdAt: new Date(2026, 9, 5, 12).toISOString() },
+    ]);
+
+    const headers = screen.getAllByText(/^Week of /);
+    expect(headers.map((header) => header.textContent)).toEqual([
+      "Week of Oct 4, 2026 – Oct 10, 2026",
+      "Week of Sep 27, 2026 – Oct 3, 2026",
+    ]);
+    expect(headers[0].parentElement).toHaveTextContent("Marcus Johnson");
+    expect(headers[0].parentElement).toHaveTextContent("Sarah Chen");
+    expect(headers[1].parentElement).not.toHaveTextContent("Marcus Johnson");
   });
 
   it("renders timeline items with user avatar showing initials", () => {
