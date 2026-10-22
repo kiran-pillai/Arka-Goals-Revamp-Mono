@@ -116,16 +116,16 @@ export function DashboardPage() {
                       c.timingStatus === "ON_TIME"
                         ? "teal"
                         : c.timingStatus === "LATE"
-                          ? "orange"
-                          : "gray"
+                        ? "orange"
+                        : "gray"
                     }
                     variant="light"
                   >
                     {c.timingStatus === "ON_TIME"
                       ? "On time"
                       : c.timingStatus === "LATE"
-                        ? "Late"
-                        : "Timing unavailable"}
+                      ? "Late"
+                      : "Timing unavailable"}
                   </Badge>
                 </Group>
               ))
@@ -144,7 +144,7 @@ export function DashboardPage() {
                     {getInitials(
                       r.giver.firstName,
                       r.giver.lastName,
-                      r.giver.email,
+                      r.giver.email
                     )}
                   </Avatar>
                   <div>
@@ -281,11 +281,6 @@ export function LeaderboardPage() {
           </Table.ScrollContainer>
         )}
       </Paper>
-      <Text size="xs" c="dimmed">
-        Historical check-ins without a recorded deadline count toward total
-        submissions. On-time credit is available for check-ins with recorded
-        deadlines.
-      </Text>
     </Stack>
   );
 }
