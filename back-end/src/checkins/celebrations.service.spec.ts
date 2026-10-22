@@ -5,6 +5,7 @@ describe('Unlimited kudos', () => {
   const tx = {
     checkIn: { findUnique: jest.fn() },
     kudos: { upsert: jest.fn() },
+    notification: { upsert: jest.fn() },
   };
   const prisma = { $transaction: jest.fn((callback) => callback(tx)) };
   const service = new CelebrationsService(prisma as unknown as PrismaService);
@@ -27,10 +28,24 @@ describe('Unlimited kudos', () => {
       update: {},
     });
   });
+  it('notifies the owner once per award without resetting read status on retries', async () => {
+    await service.give('giver', 'checkin');
+    await service.give('giver', 'checkin');
+    expect(tx.notification.upsert).toHaveBeenCalledTimes(2);
+    expect(tx.notification.upsert).toHaveBeenNthCalledWith(1, {
+      where: { kudosId: 'checkin' },
+      create: { recipientId: 'other', kudosId: 'checkin', kind: 'KUDOS' },
+      update: {},
+    });
+    expect(tx.notification.upsert.mock.calls[1][0]).toEqual(
+      tx.notification.upsert.mock.calls[0][0],
+    );
+  });
   it('still rejects self-awards', async () => {
     tx.checkIn.findUnique.mockResolvedValue({ userId: 'giver' });
     await expect(service.give('giver', 'own')).rejects.toThrow('own check-in');
     expect(tx.kudos.upsert).not.toHaveBeenCalled();
+    expect(tx.notification.upsert).not.toHaveBeenCalled();
   });
   it('still rejects missing check-ins', async () => {
     tx.checkIn.findUnique.mockResolvedValue(null);

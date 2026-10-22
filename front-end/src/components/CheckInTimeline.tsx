@@ -305,7 +305,6 @@ export default function CheckInTimeline({
                       </Badge>
                     </UnstyledButton>
 
-                    {c.kudosCount !== undefined && <KudosActions checkIn={c} />}
                     {isExpanded && (
                       <Box p="md" pt={0}>
                         <Stack gap="sm">
@@ -345,6 +344,7 @@ export default function CheckInTimeline({
                         </Box>
                       </Box>
                     )}
+                    {c.kudosCount !== undefined && <KudosActions checkIn={c} />}
                   </Box>
                 </Box>
               );

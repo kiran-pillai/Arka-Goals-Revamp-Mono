@@ -11,7 +11,7 @@ export interface InboxItem {
   createdAt: string;
   readAt: string | null;
   actor: { firstName: string | null; lastName: string | null; email: string };
-  kind: "COMMENT" | "MENTION";
+  kind: "COMMENT" | "MENTION" | "KUDOS";
   commentId: string | null;
   checkInId: string;
   checkInDate: string;

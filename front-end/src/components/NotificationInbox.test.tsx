@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   readAll: vi.fn(),
   refetch: vi.fn(),
   count: 2,
+  kind: "MENTION",
 }));
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
@@ -27,8 +28,8 @@ vi.mock("../lib/notifications", () => ({
           snapshot: "snapshot",
           items: [
             {
-              kind: "MENTION",
-              commentId: "comment",
+              kind: mocks.kind,
+              commentId: mocks.kind === "KUDOS" ? null : "comment",
               id: "notification",
               checkInId: "checkin",
               checkInDate: "2026-10-01",
@@ -69,6 +70,7 @@ describe("NotificationInbox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.count = 2;
+    mocks.kind = "MENTION";
   });
   const setup = () => {
     const user = userEvent.setup();
@@ -112,6 +114,26 @@ describe("NotificationInbox", () => {
         checkInId: "checkin",
         notificationId: "notification",
         commentId: "comment",
+      },
+    });
+    expect(mocks.read).not.toHaveBeenCalled();
+  });
+  it("shows kudos and opens the check-in without a comment target", async () => {
+    mocks.kind = "KUDOS";
+    const user = setup();
+    await user.click(
+      screen.getByRole("button", { name: "Notifications, 2 unread" }),
+    );
+    expect(
+      await screen.findByText(/gave kudos to your check-in from/),
+    ).toBeInTheDocument();
+    await user.click(screen.getByText("Anthony Wilson"));
+    expect(mocks.navigate).toHaveBeenCalledWith({
+      to: "/",
+      search: {
+        checkInId: "checkin",
+        notificationId: "notification",
+        commentId: undefined,
       },
     });
     expect(mocks.read).not.toHaveBeenCalled();

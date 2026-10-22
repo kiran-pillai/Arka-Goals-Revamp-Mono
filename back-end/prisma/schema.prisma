@@ -187,8 +187,10 @@ model Notification {
   id String @id @default(uuid())
   recipientId String
   recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
-  commentId String
-  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  kudosId String? @unique
+  kudos Kudos? @relation(fields: [kudosId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   readAt DateTime?
   kind String @default("COMMENT")
@@ -198,6 +200,7 @@ model Notification {
 }
 
 model Kudos {
+  notification Notification?
   id String @id @default(uuid())
   giverId String
   giver User @relation(fields: [giverId], references: [id], onDelete: Restrict)

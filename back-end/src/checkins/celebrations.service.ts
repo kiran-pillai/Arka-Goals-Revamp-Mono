@@ -29,11 +29,21 @@ export class CelebrationsService {
         throw new ForbiddenException(
           'You cannot give kudos to your own check-in.',
         );
-      return tx.kudos.upsert({
+      const kudos = await tx.kudos.upsert({
         where: { giverId_checkInId: { giverId: userId, checkInId } },
         create: { giverId: userId, checkInId },
         update: {},
       });
+      await tx.notification.upsert({
+        where: { kudosId: kudos.id },
+        create: {
+          recipientId: target.userId,
+          kudosId: kudos.id,
+          kind: 'KUDOS',
+        },
+        update: {},
+      });
+      return kudos;
     });
   }
 

@@ -165,9 +165,11 @@ export default function NotificationInbox() {
                         .filter(Boolean)
                         .join(" ") || item.actor.email}
                     </b>{" "}
-                    {item.kind === "MENTION"
-                      ? "mentioned you in a comment on a check-in from"
-                      : "left a comment on your check-in from"}{" "}
+                    {item.kind === "KUDOS"
+                      ? "gave kudos to your check-in from"
+                      : item.kind === "MENTION"
+                        ? "mentioned you in a comment on a check-in from"
+                        : "left a comment on your check-in from"}{" "}
                     {new Date(item.checkInDate).toLocaleDateString(undefined, {
                       month: "long",
                       day: "numeric",

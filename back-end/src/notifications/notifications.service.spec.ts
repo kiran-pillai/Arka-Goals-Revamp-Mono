@@ -37,6 +37,40 @@ describe('NotificationsService', () => {
     });
   });
 
+  it('lists kudos with the giver and check-in target without a comment', async () => {
+    const createdAt = new Date('2026-10-22T12:00:00Z');
+    const actor = {
+      firstName: 'Alex',
+      lastName: null,
+      email: 'alex@example.com',
+    };
+    notification.findMany.mockResolvedValue([
+      {
+        id: 'notification',
+        createdAt,
+        readAt: null,
+        kind: 'KUDOS',
+        commentId: null,
+        comment: null,
+        kudosId: 'kudos',
+        kudos: { giver: actor, checkIn: { id: 'checkin', createdAt } },
+      },
+    ]);
+    const result = await service.list('owner');
+    expect(result.items).toEqual([
+      {
+        id: 'notification',
+        createdAt,
+        readAt: null,
+        kind: 'KUDOS',
+        commentId: null,
+        actor,
+        checkInId: 'checkin',
+        checkInDate: createdAt,
+      },
+    ]);
+    expect(result.unreadCount).toBe(2);
+  });
   it('paginates ties by ID and exposes the next cursor without skipping rows', async () => {
     const createdAt = new Date('2026-10-10T12:00:00Z');
     notification.findFirst.mockResolvedValue({ id: 'cursor', createdAt });

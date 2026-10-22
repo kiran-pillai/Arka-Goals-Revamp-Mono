@@ -48,6 +48,14 @@ export class NotificationsService {
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         take: limit + 1,
         include: {
+          kudos: {
+            select: {
+              giver: {
+                select: { firstName: true, lastName: true, email: true },
+              },
+              checkIn: { select: { id: true, createdAt: true } },
+            },
+          },
           comment: {
             select: {
               user: {
@@ -62,15 +70,15 @@ export class NotificationsService {
         where: { recipientId: userId, readAt: null },
       }),
     ]);
-    const items = rows.slice(0, limit).map(({ comment, ...row }) => ({
+    const items = rows.slice(0, limit).map(({ comment, kudos, ...row }) => ({
       id: row.id,
       createdAt: row.createdAt,
       readAt: row.readAt,
       kind: row.kind,
       commentId: row.commentId,
-      actor: comment.user,
-      checkInId: comment.checkIn.id,
-      checkInDate: comment.checkIn.createdAt,
+      actor: kudos ? kudos.giver : comment!.user,
+      checkInId: (kudos ?? comment)!.checkIn.id,
+      checkInDate: (kudos ?? comment)!.checkIn.createdAt,
     }));
     return {
       items,
