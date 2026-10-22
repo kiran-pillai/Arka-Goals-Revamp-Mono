@@ -197,3 +197,70 @@ Navigate to the invite management page via the **Manage invites** link on the ho
 | `cd back-end && npm test`        | Run backend unit tests               |
 | `cd front-end && npm run build`  | Production build of the frontend     |
 | `cd front-end && npm run lint`   | Lint frontend with oxlint            |
+
+## Celebrations, dashboard, and leaderboard
+
+Members can give unlimited kudos to any historical check-in. Each member can give
+one lifetime award per check-in, cannot award themselves, and cannot revoke an
+award. Duplicate requests are idempotent and PostgreSQL prevents duplicate awards.
+
+Check-ins are due **Monday at 12 PM Central** for their Sunday–Saturday reporting
+week. Exactly noon is on time; later submissions are late. Central time follows
+CST/CDT. New check-ins are limited to one per member per week. Historical rows use the same deadline rule when recorded with the backfill script
+below. Until backfilled, they retain unknown timing, count toward total submissions,
+and can receive kudos.
+
+`/dashboard` shows recognition and submission counts. `/leaderboard` sorts by
+on-time submissions, then total submissions, both descending. Equal pairs share a
+rank; ranks continue without gaps. No on-time percentages are used.
+
+Authenticated API endpoints:
+
+- `GET /celebrations/dashboard`
+- `GET /celebrations/leaderboard`
+- `GET /checkins/:id/kudos`
+- `POST /checkins/:id/kudos` (idempotent for the same giver/check-in)
+
+Apply pending migrations, including `20261021120000_celebrations`, and regenerate the Prisma client
+before running the updated server. The migration preserves existing check-ins.
+The implementation does not apply migrations to deployed databases automatically.
+
+To exercise database constraints and concurrent awards, use a dedicated database
+whose name ends in `_test`; run migrations against it, build the backend, then:
+
+```sh
+cd back-end
+CELEBRATIONS_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/arka_celebrations_test node test/celebrations.integration.cjs
+```
+
+The integration script removes only its own fixtures. Review decisions are recorded
+in `.claude/plans/Celebrations_Ontime_submission.md`.
+
+### Record historical check-in timing
+
+The same script runs locally or in the production backend container. Apply the
+celebrations migration first. In a source checkout, build the backend first;
+the production image already contains the compiled script.
+
+```sh
+cd back-end
+npm run build
+npm run db:backfill-checkins -- --dry-run
+npm run db:backfill-checkins -- --apply
+```
+
+The script uses `DATABASE_URL` from the environment (or `back-end/.env` locally).
+Set it to the intended database before running. It prints the host and database
+without credentials. Running without flags is a dry run. Use `--help` for usage.
+
+For each historical submission it records the Sunday reporting-week date and
+Monday 12 PM `America/Chicago` deadline, accounting for CST/CDT. Exactly noon is
+on time. The existing dashboard and leaderboard then include its on-time credit
+without any counter rebuild. Existing recorded timing and original submission
+contents/timestamps are preserved; rerunning does not change completed rows.
+
+Duplicate submissions for the same member/week are reported by check-in ID.
+The script stops before writes rather than deleting a submission or picking one
+arbitrarily, because the schema permits only one recorded check-in per member/week.
+`--apply` runs atomically and briefly blocks check-in writes while allowing readers.
+No backfill runs automatically during application startup or deployment.

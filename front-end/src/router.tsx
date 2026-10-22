@@ -1,3 +1,4 @@
+import { DashboardPage, LeaderboardPage } from "./CelebrationsPages";
 import {
   createRootRouteWithContext,
   createRoute,
@@ -105,11 +106,24 @@ const adminInvitesRoute = createRoute({
   component: AdminInvitesRoute,
 });
 
+const dashboardRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/dashboard",
+  component: DashboardPage,
+});
+const leaderboardRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/leaderboard",
+  component: LeaderboardPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authCallbackRoute,
   layoutRoute.addChildren([
     homeRoute,
+    dashboardRoute,
+    leaderboardRoute,
     formRoute,
     goalSetupRoute,
     goalsRoute,

@@ -22,7 +22,7 @@ export default function CheckInsPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/authenticated/" });
   const readNotification = useReadNotification();
-  const clearTarget = () => navigate({ to: "/", search: {}, replace: true });
+  const clearTarget = (): Promise<void> => navigate({ to: "/", replace: true });
   const acknowledge = () => {
     setScope("squad");
     if (search.notificationId)
@@ -104,7 +104,9 @@ export default function CheckInsPage() {
           users={mentionUsers.data}
           targetCommentId={search.commentId}
           targetId={search.checkInId}
-          selectionKey={`${search.checkInId ?? ""}:${search.notificationId ?? ""}:${search.commentId ?? ""}`}
+          selectionKey={`${search.checkInId ?? ""}:${
+            search.notificationId ?? ""
+          }:${search.commentId ?? ""}`}
           onTargetArrival={acknowledge}
           checkIns={checkIns.data ?? []}
           onAddComment={(checkInId, text, mentionedUserIds) =>

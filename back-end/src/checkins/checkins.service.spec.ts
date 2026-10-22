@@ -36,7 +36,13 @@ describe('CheckInsService', () => {
       await service.create('user-1', dto);
 
       expect(checkIn.create).toHaveBeenCalledWith({
-        data: { ...dto, userId: 'user-1' },
+        data: expect.objectContaining({
+          ...dto,
+          userId: 'user-1',
+          reportingWeekStart: expect.any(Date),
+          dueAt: expect.any(Date),
+          createdAt: expect.any(Date),
+        }),
       });
     });
 
@@ -83,7 +89,17 @@ describe('CheckInsService', () => {
       expect(checkIn.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { createdAt: 'desc' },
-          include: { user: { select: { email: true, firstName: true, lastName: true, colorSlot: true } } },
+          include: expect.objectContaining({
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                colorSlot: true,
+              },
+            },
+          }),
         }),
       );
     });
@@ -95,13 +111,39 @@ describe('CheckInsService', () => {
 
       expect(checkIn.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          include: {
+          include: expect.objectContaining({
             user: {
               select: expect.objectContaining({ colorSlot: true }),
             },
-          },
+          }),
         }),
       );
     });
+  });
+  it('rejects duplicate reporting-week submissions without replacing the first', async () => {
+    checkIn.create.mockRejectedValue({ code: 'P2002' });
+    await expect(service.create('user-1', dto)).rejects.toThrow(
+      'already submitted',
+    );
+  });
+  it('adds kudos metadata and preserves unknown historical timing', async () => {
+    checkIn.findMany.mockResolvedValue([
+      {
+        id: 'old',
+        userId: 'other',
+        createdAt: new Date(),
+        dueAt: null,
+        _count: { kudos: 3 },
+        kudos: [],
+      },
+    ]);
+    expect(await service.list('user-1', false)).toEqual([
+      expect.objectContaining({
+        timingStatus: 'UNKNOWN',
+        kudosCount: 3,
+        canGiveKudos: true,
+        viewerHasGivenKudos: false,
+      }),
+    ]);
   });
 });

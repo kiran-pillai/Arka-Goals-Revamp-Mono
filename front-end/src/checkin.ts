@@ -1,31 +1,38 @@
 /** Payload sent when submitting a check-in. */
 export type CheckInInput = {
-  completedGoal: boolean
-  results: string
-  commitments: string
-  wins: string
-  frictions: string
-  rating: number
-}
+  completedGoal: boolean;
+  results: string;
+  commitments: string;
+  wins: string;
+  frictions: string;
+  rating: number;
+};
 
 export type CheckInUser = {
-  email: string
-  firstName?: string
-  lastName?: string
-  colorSlot?: number | null
-}
+  id?: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  colorSlot?: number | null;
+};
 
 export type Comment = {
-  id: string
-  text: string
-  createdAt: string
-  user: CheckInUser
-}
+  id: string;
+  text: string;
+  createdAt: string;
+  user: CheckInUser;
+};
 
 /** A check-in as returned by the API, including who submitted it. */
 export type CheckIn = CheckInInput & {
-  id: string
-  createdAt: string
-  user: CheckInUser
-  comments?: Comment[]
-}
+  id: string;
+  createdAt: string;
+  user: CheckInUser;
+  comments?: Comment[];
+  dueAt?: string | null;
+  reportingWeekStart?: string | null;
+  timingStatus?: "ON_TIME" | "LATE" | "UNKNOWN";
+  kudosCount?: number;
+  viewerHasGivenKudos?: boolean;
+  canGiveKudos?: boolean;
+};

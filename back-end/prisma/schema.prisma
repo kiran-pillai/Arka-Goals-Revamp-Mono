@@ -36,6 +36,8 @@ model User {
   lastLoginAt DateTime?
   colorSlot   Int?
 
+  kudosGiven Kudos[]
+
   invitesSent Invite[]  @relation("InvitedBy")
   checkIns    CheckIn[]
   goals       Goal[]
@@ -55,7 +57,11 @@ model CheckIn {
   rating        Int
   createdAt     DateTime @default(now())
   comments      Comment[]
+  reportingWeekStart DateTime? @db.Date
+  dueAt DateTime? @db.Timestamptz(3)
+  kudos Kudos[]
 
+  @@unique([userId, reportingWeekStart])
   @@index([userId])
   @@index([createdAt])
 }
@@ -189,4 +195,16 @@ model Notification {
   @@unique([recipientId, commentId])
   @@index([recipientId, createdAt, id])
   @@index([recipientId, readAt])
+}
+
+model Kudos {
+  id String @id @default(uuid())
+  giverId String
+  giver User @relation(fields: [giverId], references: [id], onDelete: Restrict)
+  checkInId String
+  checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([giverId, checkInId])
+  @@index([checkInId, createdAt, id])
 }

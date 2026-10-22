@@ -13,6 +13,7 @@ const body = {
   commitments: 'c',
   wins: 'w',
   frictions: 'f',
+  rating: 4,
 };
 
 describe('CheckInsController', () => {
@@ -38,7 +39,11 @@ describe('CheckInsController', () => {
 
     app = module.createNestApplication();
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     );
     await app.init();
   });

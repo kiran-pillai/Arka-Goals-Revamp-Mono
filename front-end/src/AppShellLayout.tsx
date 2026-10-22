@@ -52,6 +52,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { label: "My Dashboard", icon: IconHome, path: "/dashboard" },
+  { label: "Leaderboard", icon: IconListCheck, path: "/leaderboard" },
   { label: "View Check-Ins", icon: IconHome, path: "/" },
   { label: "Enter Weekly Form", icon: IconClipboardText, path: "/form" },
   { label: "Set Goals", icon: IconTargetArrow, path: "/goals/new" },

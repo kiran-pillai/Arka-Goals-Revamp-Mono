@@ -1,10 +1,10 @@
+import KudosActions from "./KudosActions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Badge, Box, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import {
   IconActivity,
   IconClock,
-  IconMessageCircle,
   IconThumbUp,
   IconThumbDown,
 } from "@tabler/icons-react";
@@ -15,14 +15,24 @@ import CommentThread from "./CommentThread";
 import CreatedTimestamp from "./CreatedTimestamp";
 
 function getWeekSunday(date: Date): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() - d.getDay());
-  d.setHours(0, 0, 0, 0);
-  return d;
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .formatToParts(date)
+      .map((p) => [p.type, p.value]),
+  );
+  const sunday = new Date(Date.UTC(+parts.year, +parts.month - 1, +parts.day));
+  sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
+  return sunday;
 }
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -31,7 +41,7 @@ function formatDate(date: Date): string {
 
 function formatWeekLabel(sunday: Date): string {
   const saturday = new Date(sunday);
-  saturday.setDate(sunday.getDate() + 6);
+  saturday.setUTCDate(sunday.getUTCDate() + 6);
   return `Week of ${formatDate(sunday)} – ${formatDate(saturday)}`;
 }
 
@@ -197,6 +207,7 @@ export default function CheckInTimeline({
                         display: "flex",
                         alignItems: "center",
                         gap: 10,
+                        flexWrap: "wrap",
                         padding: "14px 16px",
                         width: "100%",
                       }}
@@ -220,7 +231,7 @@ export default function CheckInTimeline({
                         {initials}
                       </Box>
 
-                      <Box style={{ flex: 1, minWidth: 0 }}>
+                      <Box style={{ flex: "1 1 160px", minWidth: 0 }}>
                         <Group gap={8}>
                           <Text fw={600} size="sm">
                             {name}
@@ -231,7 +242,26 @@ export default function CheckInTimeline({
                               size="md"
                               variant="light"
                               color="blue"
-                              leftSection={<IconMessageCircle size={16} />}
+                              radius={12}
+                              fz={11}
+                              fw={600}
+                              px={10}
+                              styles={{ section: { marginInlineEnd: 4 } }}
+                              leftSection={
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  aria-hidden="true"
+                                >
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                              }
                             >
                               {commentCount}
                             </Badge>
@@ -240,6 +270,24 @@ export default function CheckInTimeline({
                         <CreatedTimestamp value={c.createdAt} />
                       </Box>
 
+                      {c.timingStatus && (
+                        <Badge
+                          variant="light"
+                          color={
+                            c.timingStatus === "ON_TIME"
+                              ? "teal"
+                              : c.timingStatus === "LATE"
+                                ? "orange"
+                                : "gray"
+                          }
+                        >
+                          {c.timingStatus === "ON_TIME"
+                            ? "On time"
+                            : c.timingStatus === "LATE"
+                              ? "Late"
+                              : "Timing unavailable"}
+                        </Badge>
+                      )}
                       {c.rating != null && (
                         <Badge variant="light" color="arka">
                           Rating: {c.rating}/5
@@ -253,6 +301,7 @@ export default function CheckInTimeline({
                       </Badge>
                     </UnstyledButton>
 
+                    {c.kudosCount !== undefined && <KudosActions checkIn={c} />}
                     {isExpanded && (
                       <Box p="md" pt={0}>
                         <Stack gap="sm">

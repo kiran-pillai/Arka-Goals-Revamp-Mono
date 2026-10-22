@@ -18,7 +18,12 @@ export function useCreateCheckIn() {
   return useMutation({
     mutationFn: (body: CheckInInput) =>
       api<CheckIn>("/checkins", { method: "POST", body }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["checkins"] }),
+    onSuccess: async () => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["checkins"] }),
+        qc.invalidateQueries({ queryKey: ["celebrations"] }),
+      ]);
+    },
   });
 }
 
