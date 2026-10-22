@@ -23,7 +23,7 @@ export function planHistoricalCheckIns(rows: HistoricalCheckIn[]) {
     const key = `${row.userId}:${start.toISOString().slice(0, 10)}`;
     groups.set(key, [...(groups.get(key) ?? []), row]);
     if (row.reportingWeekStart !== null && row.dueAt !== null) continue;
-    // The current rule attributes a submission to its Central Sunday–Saturday week.
+    // The current rule attributes a submission to its Central Saturday–Friday week.
     if (
       row.reportingWeekStart &&
       row.reportingWeekStart.getTime() !== week.start.getTime()

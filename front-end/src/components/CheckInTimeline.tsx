@@ -14,7 +14,7 @@ import type { MentionUser } from "./CommentThread";
 import CommentThread from "./CommentThread";
 import CreatedTimestamp from "./CreatedTimestamp";
 
-function getWeekSunday(date: Date): Date {
+function getWeekSaturday(date: Date): Date {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Chicago",
@@ -25,9 +25,11 @@ function getWeekSunday(date: Date): Date {
       .formatToParts(date)
       .map((p) => [p.type, p.value]),
   );
-  const sunday = new Date(Date.UTC(+parts.year, +parts.month - 1, +parts.day));
-  sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
-  return sunday;
+  const saturday = new Date(
+    Date.UTC(+parts.year, +parts.month - 1, +parts.day),
+  );
+  saturday.setUTCDate(saturday.getUTCDate() - ((saturday.getUTCDay() + 1) % 7));
+  return saturday;
 }
 
 function formatDate(date: Date): string {
@@ -39,10 +41,10 @@ function formatDate(date: Date): string {
   });
 }
 
-function formatWeekLabel(sunday: Date): string {
-  const saturday = new Date(sunday);
-  saturday.setUTCDate(sunday.getUTCDate() + 6);
-  return `Week of ${formatDate(sunday)} – ${formatDate(saturday)}`;
+function formatWeekLabel(saturday: Date): string {
+  const friday = new Date(saturday);
+  friday.setUTCDate(saturday.getUTCDate() + 6);
+  return `Week of ${formatDate(saturday)} – ${formatDate(friday)}`;
 }
 
 type WeekGroup = { label: string; items: CheckIn[] };
@@ -110,15 +112,17 @@ export default function CheckInTimeline({
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     const groups: WeekGroup[] = [];
-    let lastSundayTime: number | null = null;
+    let lastSaturdayTime: number | null = null;
 
     for (const c of sorted) {
-      const sunday = getWeekSunday(new Date(c.createdAt));
-      const sundayTime = sunday.getTime();
+      const saturday = c.reportingWeekStart
+        ? new Date(c.reportingWeekStart)
+        : getWeekSaturday(new Date(c.createdAt));
+      const saturdayTime = saturday.getTime();
 
-      if (lastSundayTime === null || sundayTime !== lastSundayTime) {
-        groups.push({ label: formatWeekLabel(sunday), items: [] });
-        lastSundayTime = sundayTime;
+      if (lastSaturdayTime === null || saturdayTime !== lastSaturdayTime) {
+        groups.push({ label: formatWeekLabel(saturday), items: [] });
+        lastSaturdayTime = saturdayTime;
       }
       groups[groups.length - 1].items.push(c);
     }

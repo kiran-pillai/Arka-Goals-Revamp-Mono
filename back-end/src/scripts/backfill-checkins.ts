@@ -12,7 +12,7 @@ async function main() {
 Usage: npm run db:backfill-checkins -- [--dry-run | --apply]
 
 Defaults to --dry-run. Uses DATABASE_URL (or back-end/.env when run there).
-Applies the same Sunday–Saturday reporting week and Monday 12 PM
+Applies the same Saturday–Friday reporting week and Monday 12 PM
 America/Chicago deadline as new check-ins, including CST/CDT transitions.
 Exactly noon is on time. Original timestamps and existing timing are preserved.
 

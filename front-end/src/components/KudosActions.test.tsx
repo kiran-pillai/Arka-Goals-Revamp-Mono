@@ -91,47 +91,36 @@ describe("Timeline kudos", () => {
       screen.getByRole("button", { name: /See who gave kudos/ }),
     ).toBeEnabled();
   });
-  it("does not invite self-awards in an own check-in's empty popover", async () => {
-    vi.mocked(useKudosRecipients).mockReturnValue({
-      data: [],
-      isPending: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useKudosRecipients>);
-    render(
-      <MantineProvider env="test">
-        <KudosActions
-          checkIn={{ ...checkIn, canGiveKudos: false, kudosCount: 0 }}
-        />
-      </MantineProvider>,
-    );
-    await userEvent.click(
-      screen.getByRole("button", { name: /See who gave kudos/ }),
-    );
-    expect(await screen.findByText("No kudos yet.")).toBeInTheDocument();
-    expect(screen.queryByText(/Be the first/)).not.toBeInTheDocument();
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Close kudos recipients" }),
-    );
-    expect(
-      screen.getByRole("button", { name: /See who gave kudos/ }),
-    ).toHaveAttribute("aria-expanded", "false");
-  });
-  it("invites awards on another member's empty check-in", async () => {
-    vi.mocked(useKudosRecipients).mockReturnValue({
-      data: [],
-      isPending: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useKudosRecipients>);
-    render(
-      <MantineProvider env="test">
-        <KudosActions checkIn={{ ...checkIn, kudosCount: 0 }} />
-      </MantineProvider>,
-    );
-    await userEvent.click(
-      screen.getByRole("button", { name: /See who gave kudos/ }),
-    );
-    expect(
-      await screen.findByText("No kudos yet. Be the first to give kudos."),
-    ).toBeInTheDocument();
-  });
+  it.each([true, false])(
+    "leaves the kudos summary blank at zero (canGiveKudos=%s)",
+    (canGiveKudos) => {
+      const { rerender, container } = render(
+        <MantineProvider env="test">
+          <KudosActions checkIn={{ ...checkIn, canGiveKudos, kudosCount: 0 }} />
+        </MantineProvider>,
+      );
+      expect(
+        screen.queryByRole("button", { name: /See who gave kudos/ }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/gave kudos|No kudos yet/),
+      ).not.toBeInTheDocument();
+      expect(container.querySelector(".kudos-actions") !== null).toBe(
+        canGiveKudos,
+      );
+      if (canGiveKudos) {
+        expect(
+          screen.getByRole("button", { name: "Give kudos" }),
+        ).toBeEnabled();
+      }
+      rerender(
+        <MantineProvider env="test">
+          <KudosActions checkIn={{ ...checkIn, canGiveKudos, kudosCount: 1 }} />
+        </MantineProvider>,
+      );
+      expect(
+        screen.getByRole("button", { name: /See who gave kudos/ }),
+      ).toHaveTextContent("1 person gave kudos");
+    },
+  );
 });

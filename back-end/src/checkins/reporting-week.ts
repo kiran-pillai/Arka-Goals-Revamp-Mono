@@ -50,15 +50,15 @@ export function centralInstant(date: Date, hour: number): Date {
 export function reportingWeek(now: Date) {
   const p = parts(calendar, now);
   const start = new Date(Date.UTC(+p.year, +p.month - 1, +p.day));
-  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+  start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 1) % 7));
   const monday = new Date(start);
-  monday.setUTCDate(monday.getUTCDate() + 1);
-  const nextSunday = new Date(start);
-  nextSunday.setUTCDate(nextSunday.getUTCDate() + 7);
+  monday.setUTCDate(monday.getUTCDate() + 2);
+  const nextSaturday = new Date(start);
+  nextSaturday.setUTCDate(nextSaturday.getUTCDate() + 7);
   return {
     start,
     dueAt: centralInstant(monday, 12),
-    resetsAt: centralInstant(nextSunday, 0),
+    resetsAt: centralInstant(nextSaturday, 0),
   };
 }
 

@@ -22,43 +22,43 @@ describe('historical check-in backfill', () => {
   it.each([
     [
       '2026-10-19T16:59:59.999Z',
-      '2026-10-18',
+      '2026-10-17',
       '2026-10-19T17:00:00.000Z',
       'ON_TIME',
     ],
     [
       '2026-10-19T17:00:00.000Z',
-      '2026-10-18',
+      '2026-10-17',
       '2026-10-19T17:00:00.000Z',
       'ON_TIME',
     ],
     [
       '2026-10-19T17:00:00.001Z',
-      '2026-10-18',
+      '2026-10-17',
       '2026-10-19T17:00:00.000Z',
       'LATE',
     ],
     [
       '2026-11-02T18:00:00.000Z',
-      '2026-11-01',
+      '2026-10-31',
       '2026-11-02T18:00:00.000Z',
       'ON_TIME',
     ],
     [
       '2026-03-09T17:00:00.001Z',
-      '2026-03-08',
+      '2026-03-07',
       '2026-03-09T17:00:00.000Z',
       'LATE',
     ],
     [
-      '2026-10-25T04:59:59.000Z',
-      '2026-10-18',
+      '2026-10-24T04:59:59.000Z',
+      '2026-10-17',
       '2026-10-19T17:00:00.000Z',
       'LATE',
     ],
     [
-      '2026-10-25T05:00:00.000Z',
-      '2026-10-25',
+      '2026-10-24T05:00:00.000Z',
+      '2026-10-24',
       '2026-10-26T17:00:00.000Z',
       'ON_TIME',
     ],
@@ -93,7 +93,7 @@ describe('historical check-in backfill', () => {
   });
   it('reports duplicate weeks including collisions with recorded rows', () => {
     const existing = row('existing', '2026-10-19T16:00:00Z', {
-      reportingWeekStart: new Date('2026-10-18T00:00:00Z'),
+      reportingWeekStart: new Date('2026-10-17T00:00:00Z'),
       dueAt: new Date('2026-10-19T17:00:00Z'),
     });
     const plan = planHistoricalCheckIns([
@@ -101,7 +101,7 @@ describe('historical check-in backfill', () => {
       row('legacy', '2026-10-20T12:00:00Z'),
     ]);
     expect(plan.conflicts).toEqual([
-      { userWeek: 'u1:2026-10-18', checkInIds: ['existing', 'legacy'] },
+      { userWeek: 'u1:2026-10-17', checkInIds: ['existing', 'legacy'] },
     ]);
   });
   it('allows separate users and reporting weeks', () => {
@@ -116,7 +116,7 @@ describe('historical check-in backfill', () => {
   it('fills a missing deadline while retaining the recorded week', () => {
     const plan = planHistoricalCheckIns([
       row('a', '2026-10-19T16:00:00Z', {
-        reportingWeekStart: new Date('2026-10-18T00:00:00Z'),
+        reportingWeekStart: new Date('2026-10-17T00:00:00Z'),
       }),
     ]);
     expect(plan.updates[0].dueAt.toISOString()).toBe(

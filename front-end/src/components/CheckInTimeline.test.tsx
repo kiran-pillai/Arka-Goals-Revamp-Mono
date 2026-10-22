@@ -139,24 +139,24 @@ describe("CheckInTimeline", () => {
 
     // Two different weeks in the test data
     expect(
-      screen.getByText("Week of Sep 27, 2026 – Oct 3, 2026"),
+      screen.getByText("Week of Sep 26, 2026 – Oct 2, 2026"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Week of Sep 20, 2026 – Sep 26, 2026"),
+      screen.getByText("Week of Sep 19, 2026 – Sep 25, 2026"),
     ).toBeInTheDocument();
   });
 
-  it("starts a new group on Sunday and keeps Monday in that week", () => {
+  it("starts a new group on Saturday and keeps Sunday and Monday in that week", () => {
     renderTimeline([
-      { ...CHECKINS[0], createdAt: new Date(2026, 9, 3, 12).toISOString() },
-      { ...CHECKINS[1], createdAt: new Date(2026, 9, 4, 12).toISOString() },
-      { ...CHECKINS[2], createdAt: new Date(2026, 9, 5, 12).toISOString() },
+      { ...CHECKINS[0], createdAt: "2026-10-03T04:59:59.999Z" },
+      { ...CHECKINS[1], createdAt: "2026-10-03T05:00:00.000Z" },
+      { ...CHECKINS[2], createdAt: "2026-10-05T16:00:00.000Z" },
     ]);
 
     const headers = screen.getAllByText(/^Week of /);
     expect(headers.map((header) => header.textContent)).toEqual([
-      "Week of Oct 4, 2026 – Oct 10, 2026",
-      "Week of Sep 27, 2026 – Oct 3, 2026",
+      "Week of Oct 3, 2026 – Oct 9, 2026",
+      "Week of Sep 26, 2026 – Oct 2, 2026",
     ]);
     expect(headers[0].parentElement).toHaveTextContent("Marcus Johnson");
     expect(headers[0].parentElement).toHaveTextContent("Sarah Chen");

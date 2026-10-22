@@ -204,11 +204,15 @@ Members can give unlimited kudos to any historical check-in. Each member can giv
 one lifetime award per check-in, cannot award themselves, and cannot revoke an
 award. Duplicate requests are idempotent and PostgreSQL prevents duplicate awards.
 
-Check-ins are due **Monday at 12 PM Central** for their Sunday–Saturday reporting
-week. Exactly noon is on time; later submissions are late. Central time follows
+Check-ins are due **Monday at 12 PM Central** for their Saturday–Friday reporting
+week. Submissions open Saturday at midnight Central. Exactly noon is on time; later submissions are late. Central time follows
 CST/CDT. New check-ins are limited to one per member per week. Historical rows use the same deadline rule when recorded with the backfill script
 below. Until backfilled, they retain unknown timing, count toward total submissions,
 and can receive kudos.
+
+The Saturday-week migration shifts existing Sunday week keys back one day while
+preserving recorded deadlines and historical on-time status. Apply migrations
+before running the updated server.
 
 `/dashboard` shows recognition and submission counts. `/leaderboard` sorts by
 on-time submissions, then total submissions, both descending. Equal pairs share a
@@ -253,7 +257,7 @@ The script uses `DATABASE_URL` from the environment (or `back-end/.env` locally)
 Set it to the intended database before running. It prints the host and database
 without credentials. Running without flags is a dry run. Use `--help` for usage.
 
-For each historical submission it records the Sunday reporting-week date and
+For each historical submission it records the Saturday reporting-week date and
 Monday 12 PM `America/Chicago` deadline, accounting for CST/CDT. Exactly noon is
 on time. The existing dashboard and leaderboard then include its on-time credit
 without any counter rebuild. Existing recorded timing and original submission
