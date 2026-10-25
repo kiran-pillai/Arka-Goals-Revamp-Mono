@@ -121,7 +121,7 @@ export class CelebrationsService {
       rank: position?.rank ?? null,
       tied: position?.tied ?? false,
       recentRecognition: recent,
-      recentCheckIns: checkIns.slice(0, 6).map((c) => ({
+      recentCheckIns: checkIns.slice(0, 4).map((c) => ({
         ...c,
         timingStatus: timingStatus(c.createdAt, c.dueAt),
       })),
