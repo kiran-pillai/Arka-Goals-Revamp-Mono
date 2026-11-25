@@ -18,6 +18,7 @@ import {
   IconMailForward,
   IconChevronsLeft,
   IconChevronsRight,
+  IconBook,
 } from "@tabler/icons-react";
 import NotificationInbox from "./components/NotificationInbox";
 import { useAuth } from "./auth/AuthContext";
@@ -63,6 +64,11 @@ const NAV_ITEMS: NavItem[] = [
     icon: IconMailForward,
     path: "/admin/invites",
     adminOnly: true,
+  },
+  {
+    label: "Guidelines & Procedures",
+    icon: IconBook,
+    path: "/guidelines",
   },
 ];
 

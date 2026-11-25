@@ -1,0 +1,39 @@
+.guidelines-page,
+.guidelines-page .mantine-SimpleGrid-root > * {
+  min-width: 0;
+}
+
+.guidelines-intro {
+  background: linear-gradient(120deg, var(--mantine-color-arka-light), transparent);
+  border: 1px solid var(--mantine-color-arka-light-hover);
+}
+
+.guidelines-page .mantine-List-item {
+  line-height: 1.65;
+}
+
+.guidelines-resources {
+  scroll-margin-top: 80px;
+}
+
+.guidelines-resource {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.guidelines-resource:hover {
+  border-color: var(--mantine-color-arka-filled);
+  background-color: var(--mantine-color-arka-light);
+}
+
+.guidelines-resource:focus-visible {
+  outline: 2px solid var(--mantine-color-arka-filled);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guidelines-resource {
+    transition: none;
+  }
+}

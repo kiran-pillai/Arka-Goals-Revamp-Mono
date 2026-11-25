@@ -15,6 +15,7 @@ import CheckInsPage from "./CheckInsPage";
 import WeeklyCheckIn from "./WeeklyCheckIn";
 import GoalSetup from "./GoalSetup";
 import GoalsTable from "./GoalsTable";
+import GuidelinesPage from "./GuidelinesPage";
 
 export interface RouterContext {
   auth: { user: AuthUser | null };
@@ -117,6 +118,12 @@ const leaderboardRoute = createRoute({
   component: LeaderboardPage,
 });
 
+const guidelinesRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/guidelines",
+  component: GuidelinesPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authCallbackRoute,
@@ -128,6 +135,7 @@ const routeTree = rootRoute.addChildren([
     goalSetupRoute,
     goalsRoute,
     adminInvitesRoute,
+    guidelinesRoute,
   ]),
 ]);
 
